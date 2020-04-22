@@ -6,5 +6,10 @@
   * */
  package com.AddressBook;
 
+ import com.AddressBook.Command.Command;
+
  public class Parser {
+     Command parseCommand() {
+         return null;
+     }
  }
