@@ -4,7 +4,7 @@
   * Last Modified:  4/22/20
   * Description:
   * */
- package com.AddressBook.System;
+ package com.AddressBook.SystemModule;
 
- public class System {
+ public class SystemClass {
  }

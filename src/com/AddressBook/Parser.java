@@ -9,7 +9,8 @@
  import com.AddressBook.Command.Command;
 
  public class Parser {
-     Command parseCommand() {
+     public Parser() { }
+     public Command parseCommand(String s) throws IllegalArgumentException {
          return null;
      }
  }
