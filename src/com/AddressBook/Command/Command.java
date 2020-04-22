@@ -8,37 +8,25 @@
 
  import com.AddressBook.User;
 
- public abstract class Command<T> {
+ public abstract class Command {
      public final int authRequirement;
 
-
-     private User user;
-
-     protected User getUser() {
-         return this.user;
-     }
-
-     protected void setUser(User m_user) {
-         this.user = m_user;
-     }
-
-     public Command(int authRequirement, User user) {
+     public Command(int authRequirement) {
          this.authRequirement = authRequirement;
-         this.user = user;
      }
 
-     abstract T execute(User user) throws CommandException;
+     abstract String execute(User user) throws CommandException;
  }
 
 /*
 example subclass implementation
- public class AddRecord extends Command<Void> {
+ public class AddRecord extends Command {
      AddRecord() {
          super(1);
      }
 
      @Override
-     public Void execute(User user) {
+     public String execute(User user) {
         // do your stuff
      }
  }

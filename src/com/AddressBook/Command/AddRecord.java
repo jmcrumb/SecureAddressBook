@@ -8,13 +8,6 @@
 
  import com.AddressBook.User;
 
- public class AddRecord extends Command<Void> {
-     AddRecord() {
-         super(1);
-     }
+ public class AddRecord {
 
-     @Override
-     public Void execute(User user) {
-         return null;
-     }
  }
