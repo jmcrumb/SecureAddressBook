@@ -1,4 +1,5 @@
-package com.COMP365;
+package com.AddressBook;
+
 
 public class Main {
     public static void main(String[] args) {
