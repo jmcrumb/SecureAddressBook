@@ -6,5 +6,11 @@
   * */
  package com.AddressBook.Database;
 
+ import com.AddressBook.UserEntry;
+
  public class UserDatabase {
+  public static UserEntry get(String username, String password){
+   //TODO implment this
+   return null;
+  }
  }

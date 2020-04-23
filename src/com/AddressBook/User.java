@@ -6,5 +6,29 @@
   * */
  package com.AddressBook;
 
+ import com.AddressBook.Database.UserDatabase;
+
  public class User {
+  private UserEntry entry;
+  User(UserEntry ue){
+   this.entry = ue;
+  }
+  User(String username, String password){
+   this.entry = UserDatabase.get(username, password);
+  }
+
+  String sign(){
+   return null;
+  }
+
+  String encrypt(){
+   return null;
+  }
+  String decrypt(){
+   return null;
+  }
+  String getID(){
+   return null;
+  }
+
  }

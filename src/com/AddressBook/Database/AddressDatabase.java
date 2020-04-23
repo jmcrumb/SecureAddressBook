@@ -6,5 +6,8 @@
   * */
  package com.AddressBook.Database;
 
+ import com.AddressBook.UserEntry;
+
  public class AddressDatabase {
+
  }
