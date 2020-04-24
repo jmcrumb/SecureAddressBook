@@ -4,7 +4,7 @@
   * Last Modified:  4/22/20
   * Description:
   * */
- package com.AddressBook;
+ package com.AddressBook.UserEntry;
 
  public class UserEntry {
  }

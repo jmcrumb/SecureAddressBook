@@ -7,6 +7,7 @@
  package com.AddressBook;
 
  import com.AddressBook.Database.UserDatabase;
+ import com.AddressBook.UserEntry.UserEntry;
 
  public class User {
   private UserEntry entry;

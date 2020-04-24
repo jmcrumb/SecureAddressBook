@@ -4,7 +4,10 @@
   * Last Modified:  4/22/20
   * Description:
   * */
- package com.AddressBook.SystemModule;
+ package com.AddressBook;
 
- public class SystemClass {
+ public class Application {
+  public static void run(){
+
+  }
  }
