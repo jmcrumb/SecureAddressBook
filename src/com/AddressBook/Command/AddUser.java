@@ -52,8 +52,8 @@
      * @return if the input is valid
      */
     private boolean validateInput() {
-        if(userID.length() > MAX_SIZE)
+        if(userID == null || userID.length() > MAX_SIZE)
             return false;
-        return userID.matches("[a-zA-Z0-9]");
+        return userID.matches("^[a-zA-Z0-9]*$");
     }
  }
