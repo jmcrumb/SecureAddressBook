@@ -7,4 +7,11 @@
  package com.AddressBook.UserEntry;
 
  public class AdminEntry {
+    final String adminid;
+    final String adminpw;
+    public AdminEntry(UserEntry entry)
+    {
+        this.adminid = entry.userid;
+        this.adminpw = entry.password;
+    }
  }
