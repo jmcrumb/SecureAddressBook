@@ -23,7 +23,6 @@
   * Singleton Object to hold the user database
   */
  public class UserDatabase{
-     //  getInstance
      /**
       * the maximum # of accounts that can be created including admin
       */
@@ -162,7 +161,7 @@
       * @return if the database is full
       */
      public boolean isFull() {
-         return (map.size() < MAX_ACCOUNTS);
+         return !(map.size() < MAX_ACCOUNTS);
      }
 
      /**
