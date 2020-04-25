@@ -23,7 +23,6 @@
   * Singleton Object to hold the user database
   */
  public class UserDatabase{
-     //  getInstance
      /**
       * the maximum # of accounts that can be created including admin
       */
@@ -162,7 +161,20 @@
       * @return if the database is full
       */
      public boolean isFull() {
-         return (map.size() < MAX_ACCOUNTS);
+         return !(map.size() < MAX_ACCOUNTS);
+     }
+
+     /**
+      * @param userId User to delete
+      * @throws IOException if fails to find account
+      */
+     public void deleteUser(String userId) throws IOException{
+         if (exists(userId)) {
+             map.remove(userId);
+             updateDbFile();
+         } else {
+             throw new IOException("Account doesn't exist");
+         }
      }
 
      /**
@@ -181,11 +193,11 @@
       */
      public void set(UserEntry entry) throws IOException {
          // if the max # of accounts isn't reached or just updating account that exists
-         if (map.size() < MAX_ACCOUNTS || exists(entry.userId)) {
+         if (!isFull() || exists(entry.userId)) {
              map.put(entry.userId, entry);
              updateDbFile();
          } else {
-             throw new IllegalArgumentException("Already at max accounts!" +
+             throw new IOException("Already at max accounts!" +
                " delete one before adding a new one");
          }
      }
