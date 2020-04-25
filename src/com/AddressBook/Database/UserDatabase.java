@@ -164,6 +164,10 @@
          return !(map.size() < MAX_ACCOUNTS);
      }
 
+     /**
+      * @param userId User to delete
+      * @throws IOException if fails to find account
+      */
      public void deleteUser(String userId) throws IOException{
          if (exists(userId)) {
              map.remove(userId);

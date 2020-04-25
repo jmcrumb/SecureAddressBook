@@ -32,4 +32,8 @@
    return null;
   }
 
+  public int getAuthorization() {
+      return null;
+  }
+
  }
