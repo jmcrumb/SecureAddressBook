@@ -164,6 +164,15 @@
          return !(map.size() < MAX_ACCOUNTS);
      }
 
+     public void deleteUser(String userId) throws IOException{
+         if (exists(userId)) {
+             map.remove(userId);
+             updateDbFile();
+         } else {
+             throw new IOException("Account doesn't exist");
+         }
+     }
+
      /**
       * Get an entry from the database
       * @param userId the id of the entry to retrieve
@@ -180,11 +189,11 @@
       */
      public void set(UserEntry entry) throws IOException {
          // if the max # of accounts isn't reached or just updating account that exists
-         if (map.size() < MAX_ACCOUNTS || exists(entry.userId)) {
+         if (!isFull() || exists(entry.userId)) {
              map.put(entry.userId, entry);
              updateDbFile();
          } else {
-             throw new IllegalArgumentException("Already at max accounts!" +
+             throw new IOException("Already at max accounts!" +
                " delete one before adding a new one");
          }
      }
