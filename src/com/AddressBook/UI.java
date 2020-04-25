@@ -25,7 +25,7 @@
 
      public Command getNextCommand() {
          Command command = null;
-         /*while (command == null) {
+         while (command == null) {
              String raw = System.console().readLine();
              if (!validateTotalCharSet(raw)) ;
              String cmdStr = raw.substring(0, 3);
@@ -40,29 +40,39 @@
                      return command = ChangePassword(raw);
                      break;
                  case "ADU":
+                     return command = AddUser(raw);
                      break;
                  case "DEU":
+                     return command = DeleteUser(raw);
                      break;
                  case "DAL":
+                     return command = DisplayAuditLog(raw);
                      break;
                  case "ADR":
+                     return command = AddRecord(raw);
                      break;
                  case "DER":
+                     return command = DeleteRecord(raw);
                      break;
                  case "EDR":
+                     return command = EditRecord(raw);
                      break;
                  case "RER":
+                     return command = ReadRecord(raw);
                      break;
                  case "IMD":
+                     return command = ImportDatabase(raw);
                      break;
                  case "EXD":
+                     return command = ExportDatabase(raw);
                      break;
                  case "HLP":
+                     return command = HLP(raw);
                      break;
                  default:
-
+                     break;
              }
-         }*/
+         }
          return null;
      }
 
