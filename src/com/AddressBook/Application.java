@@ -22,15 +22,17 @@ public class Application {
      * and error reporting.
      */
     public static void run(){
+        UserInterface ui = new UserInterface();
+
         while(true) {
             try{
-                processInput();
+                ui.sendResponse(processInput(ui));
             } catch(CommandException ce) {
-                System.out.println("An error has occurred with the most recently entered command");
+                ui.sendResponse(ce.getMessage());
             } catch(IllegalAccessError ae) {
-                System.out.println("The current user is not authorized to execute this command");
+                ui.sendResponse("The current user is not authorized");
             } catch(Exception e) {
-                System.out.println("An unknown error has occurred");
+                ui.sendResponse("An unknown error has occurred");
             }
         }
     }
@@ -39,10 +41,11 @@ public class Application {
      * Represents a single iteration of processing a command, authorizing, and 
      * executing said command.
      * 
+     * @param ui User Interface instance to interact with the user
      * @throws IllegalAccessError if an unauthorized access attempt occurs
      */
-    private static void processInput() throws IllegalAccessError{
-        Command command = UserInterface.getNextCommand();                          //TODO: Is userinterface static or does an instance need to be created?
+    private static String processInput(UserInterface ui) throws IllegalAccessError{
+        Command command = ui.getNextCommand();                         
         boolean isAuthorized = Authorization.verify(command);
         AuditLog.getInstance().logCommand(command, isAuthorized);
         if(isAuthorized)
