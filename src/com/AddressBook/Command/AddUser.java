@@ -6,7 +6,7 @@
   * */
  package com.AddressBook.Command;
 
- import com.AddressBook.User.User;
+ import com.AddressBook.User;
  import com.AddressBook.UserEntry.UserEntry;
 
  public class AddUser extends Command{
