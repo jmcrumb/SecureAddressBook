@@ -6,7 +6,7 @@
   * */
  package com.AddressBook.Command;
 
- import com.AddressBook.User.User;
+ import com.AddressBook.User;
  import com.AddressBook.UserEntry.UserEntry;
 
  public class AddUser extends Command{
@@ -54,6 +54,6 @@
     private boolean validateInput() {
         if(userID == null || userID.length() > MAX_SIZE)
             return false;
-        return userID.matches("^[a-zA-Z0-9]*$");
+        return userID.matches("^[a-zA-Z0-9]+$");
     }
  }
