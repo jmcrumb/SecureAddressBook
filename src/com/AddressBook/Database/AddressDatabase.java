@@ -14,6 +14,7 @@
  import java.nio.file.Files;
  import java.nio.file.Path;
  import java.nio.file.Paths;
+ import java.security.GeneralSecurityException;
  import java.util.HashMap;
  import java.util.Map;
 
@@ -27,14 +28,14 @@
       * this interface is used to provide a lambda to encrypt a string when calling {@link #set}
       */
      public interface Encrypter {
-         String encrypt(String plainText);
+         String encrypt(String plainText) throws GeneralSecurityException;
      }
 
      /**
       * this interface is used to provide a lambda to decrypt a string when calling {@link #set}, {@link #get}, {@link #exists} and {@link #isFull}
       */
      public interface Decrypter {
-         String decrypt(String encrypted);
+         String decrypt(String encrypted) throws GeneralSecurityException;
      }
 
      /**
@@ -98,7 +99,7 @@
       * @return map of the data loaded from the file
       * @throws IOException if fails to read file or misformatted
       */
-     private @NotNull Map<String, AddressEntry> getMapFromFile(String userId, Decrypter decrypter) throws IOException, IllegalArgumentException {
+     private @NotNull Map<String, AddressEntry> getMapFromFile(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
          @Nullable String encypted = readFile(userId);
          if (encypted == null) {
              return new HashMap<>();
@@ -135,7 +136,7 @@
       * @param m         the map of data to store in the file
       * @throws IOException if fails to write
       */
-     private void setFileFromMap(String userId, @NotNull Encrypter encrypter, @NotNull Map<String, AddressEntry> m) throws IOException {
+     private void setFileFromMap(String userId, @NotNull Encrypter encrypter, @NotNull Map<String, AddressEntry> m) throws IOException, GeneralSecurityException {
          StringBuilder sb = new StringBuilder();
          m.forEach((k, v) -> {
              sb.append(v.toString()).append("\n");
@@ -149,7 +150,7 @@
       * @param decrypter function to decrypt the data
       * @throws IOException if fails to read db file
       */
-     private void instantiateMapIfNeeded(String userId, Decrypter decrypter) throws IOException {
+     private void instantiateMapIfNeeded(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
          if (map == null || currentUserId == null || !currentUserId.equals(userId)) {
              map = getMapFromFile(userId, decrypter);
              currentUserId = userId;
@@ -165,9 +166,19 @@
       * @return the record with the passed id
       * @throws IOException if database fails to load from file
       */
-     public AddressEntry get(String userId, String recordId, Decrypter decrypter) throws IOException {
+     public AddressEntry get(String userId, String recordId, Decrypter decrypter) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          return map.get(recordId);
+     }
+
+     public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter) throws IOException, GeneralSecurityException {
+         instantiateMapIfNeeded(userId, decrypter);
+         if (!map.containsKey(recordId)) {
+             throw new IOException("Record Not Found");
+         } else {
+             map.remove(recordId);
+             setFileFromMap(userId, encrypter, map);
+         }
      }
 
      /**
@@ -179,13 +190,13 @@
       * @param encrypter function to encrypt records
       * @throws IOException if database fails to load from file or save to file
       */
-     public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter) throws IOException {
+     public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          if (!isFull(userId, decrypter) || map.containsKey(entry.recordId)) {
              map.put(entry.recordId, entry);
              setFileFromMap(userId, encrypter, map);
          } else {
-             throw new IllegalArgumentException("Number of records exceeds maximum");
+             throw new IOException("Number of records exceeds maximum");
          }
      }
 
@@ -197,7 +208,7 @@
       * @return if the record exists
       * @throws IOException if database fails to load from file
       */
-     public boolean exists(String userId, Decrypter decrypter) throws IOException {
+     public boolean exists(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          return map.containsKey(userId);
      }
@@ -210,31 +221,33 @@
       * @return if the database is full
       * @throws IOException if fails to read db file
       */
-     public boolean isFull(String userId, Decrypter decrypter) throws IOException {
+     public boolean isFull(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          return !(map.size() < MAX_RECORDS);
      }
 
      /**
       * Export database as CSV string
+      *
       * @param userId    user of data to access
       * @param decrypter function to decrypt data
       * @return CSV string of user's database
       * @throws IOException if failed to read db file
       */
-     public String exportDB(String userId, Decrypter decrypter) throws IOException {
+     public String exportDB(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
          String raw = readFile(userId);
          return decrypter.decrypt(raw);
      }
 
      /**
       * Import CSV string into database
+      *
       * @param userId    user of data to access
       * @param encrypter function to encrypt data
       * @param data      CSV data to add
       * @throws IOException if fails to read or write db file
       */
-     public void importDB(String userId, Decrypter decrypter, Encrypter encrypter, @NotNull String data) throws IOException {
+     public void importDB(String userId, Decrypter decrypter, Encrypter encrypter, @NotNull String data) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          @NotNull Map<String, AddressEntry> m = getMapFromString(data);
          for (Map.Entry<String, AddressEntry> entry : m.entrySet()) {
