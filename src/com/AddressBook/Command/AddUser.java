@@ -32,28 +32,14 @@
      */
     @Override
     public String execute() throws CommandException {
-        if(!validateInput())
-            return "Invalid userID";
+        if(!validateInput(userID, MAX_SIZE))
+            throw new CommandException("Invalid userID");
         else if(UserDatabase.get(userID) != null)
-            return "Account already exists";
+            throw new CommandException("Account already exists");
         else {
             //Creates a new user associated with the userID
             UserDatabase.set(new UserEntry(userID));
             return "OK";
         }
-    }
-
-    /**
-     * Helper method for validating input conforms with requirements 
-     * outlined in design document:
-     * i) Is no larger than the Maximum size of input for a userID 
-     * ii) Is alphanumeric
-     * 
-     * @return if the input is valid
-     */
-    private boolean validateInput() {
-        if(userID == null || userID.length() > MAX_SIZE)
-            return false;
-        return userID.matches("^[a-zA-Z0-9]+$");
     }
  }

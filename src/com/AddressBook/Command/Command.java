@@ -46,6 +46,38 @@
      }
 
      /**
+     * Helper method for validating input conforms with requirements 
+     * outlined in design document:
+     * i) Is no larger than the Maximum size of input for an input 
+     * ii) Is alphanumeric
+     * iii) Is nonempty
+     * 
+     * @param input Input to be validated
+     * @param maxSize maximum size of input
+     * @return if the input is valid
+     */
+    protected boolean validateInput(String input, int maxSize) {
+        if(input == null || input.length() > maxSize)
+            return false;
+        return input.matches("^[a-zA-Z0-9]+$");
+    }
+
+    /**
+     * Helper method for validating input conforms with requirements 
+     * outlined in design document:
+     * i) Is alphanumeric
+     * ii) Is nonempty
+     * 
+     * @param input Input to be validated
+     * @return if the input is valid
+     */
+    protected boolean validateInput(String input) {
+        if(input == null)
+            return false;
+        return input.matches("^[a-zA-Z0-9]+$");
+    }
+
+     /**
       * Executes command represented by this object.  This class is abstract and thus 
       * must be overloaded in all subclass implementations of this class.
       *

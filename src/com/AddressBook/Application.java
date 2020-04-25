@@ -26,11 +26,11 @@ public class Application {
 
         while(true) {
             try{
-                processInput(ui);
+                ui.sendResponse(processInput(ui));
             } catch(CommandException ce) {
-                ui.sendResponse("An error has occurred with the most recently entered command");
+                ui.sendResponse(ce.getMessage());
             } catch(IllegalAccessError ae) {
-                ui.sendResponse("The current user is not authorized to execute this command");
+                ui.sendResponse("The current user is not authorized");
             } catch(Exception e) {
                 ui.sendResponse("An unknown error has occurred");
             }
@@ -44,7 +44,7 @@ public class Application {
      * @param ui User Interface instance to interact with the user
      * @throws IllegalAccessError if an unauthorized access attempt occurs
      */
-    private static void processInput(UserInterface ui) throws IllegalAccessError{
+    private static String processInput(UserInterface ui) throws IllegalAccessError{
         Command command = ui.getNextCommand();                         
         boolean isAuthorized = Authorization.verify(command);
         AuditLog.getInstance().logCommand(command, isAuthorized);
