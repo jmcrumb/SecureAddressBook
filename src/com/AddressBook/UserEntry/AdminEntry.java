@@ -9,9 +9,11 @@
  public class AdminEntry {
     final String adminid;
     final String adminpw;
+    final int authLevel;
     public AdminEntry(UserEntry entry)
     {
         this.adminid = entry.userid;
-        this.adminpw = entry.password;
+        this.adminpw = entry.pwhash;
+        this.authLevel = 2;
     }
  }
