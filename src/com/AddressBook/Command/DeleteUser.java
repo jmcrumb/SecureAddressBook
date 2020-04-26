@@ -6,33 +6,35 @@
   * */
  package com.AddressBook.Command;
 
- public class DeleteUser {
+ public class DeleteUser extends Command
+ {
     private String userid;
-  
-    public DeleteUser(String userid)
+
+    public DeleteUser(String userid)    //the parameter is the userid to be deleted
     {
+        super(userid, 2, "DU", null);     //there is no code for failed user deletions
         this.userid = userid;
     }
 
     public String execute() throws CommandException
     {
-        currAuth = verify(this);
+        boolean currAuth = Authorization.verify(this);
         if(currAuth)
         {
-            if(exists(this.userid))
+            UserDatabase udb = UserDatabase.getInstance();
+            if(udb.exists(this.userid))  //checks that the user exists before trying to delete it
             {
-                userToDelete = new UserEntry(this.userid); //need decent way to remove user from user database
-                addressDatabase.set(userToDelete)
+                userDatabase.deleteUser(this.userid);
             }
-            if(!exists(this.userid))
+            if(!udb.exists(this.userid))     //handles the admin trying to delete a user that doesn't exist
             {
                 sendResponse("User not found.\n");
             }
-            return authorizedCode;
+            return this.authorizedCode;  //returns authorized code for the audit log
         }
         else
         {
-            return unauthorizedCode;
+            return this.unauthorizedCode;   //returns null
         }
     }
- }
+}
