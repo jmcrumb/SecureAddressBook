@@ -84,6 +84,6 @@
       * @return String to be determined by implementation
       * @throws CommandException
       */
-      abstract String execute() throws CommandException;
+      abstract String execute() throws Exception;
 
  }

@@ -6,7 +6,9 @@
   * */
  package com.AddressBook.Command;
 
- import com.AddressBook.User;
+ import java.io.IOException;
+
+import com.AddressBook.User;
  import com.AddressBook.UserEntry.UserEntry;
 
  public class AddUser extends Command{
@@ -31,7 +33,7 @@
      * @throws CommandException
      */
     @Override
-    public String execute() throws CommandException {
+    public String execute() throws CommandException, IOException {
         if(!validateInput(userID, MAX_SIZE))
             throw new CommandException("Invalid userID");
         else if(UserDatabase.get(userID) != null)

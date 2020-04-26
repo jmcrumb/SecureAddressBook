@@ -8,6 +8,7 @@
   * */
  package com.AddressBook;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 import com.AddressBook.User;
@@ -29,6 +30,8 @@ public class Application {
                 ui.sendResponse(processInput(ui));
             } catch(CommandException ce) {
                 ui.sendResponse(ce.getMessage());
+            } catch(IOException ioe) {
+                ui.sendResponse(ioe.getMessage());
             } catch(IllegalAccessError ae) {
                 ui.sendResponse("The current user is not authorized");
             } catch(Exception e) {
