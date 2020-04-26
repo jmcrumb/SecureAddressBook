@@ -161,6 +161,8 @@ import java.io.Console;
             case "HLP":
                 String hlpinput = parseBasicCommand(commandString);
                 UserInterface.helpHandler(hlpinput);
+            case default:
+                System.out.println("Command not found.\n");
         }
 
     }
@@ -237,6 +239,8 @@ import java.io.Console;
             case "HLP":
                 System.out.println("HLP [<command name>]\n"); 
                 break;
+            case default: 
+                System.out.println("Command not found.\n");
         }
     }
 
