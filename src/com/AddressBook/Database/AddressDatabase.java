@@ -11,6 +11,7 @@
  import org.jetbrains.annotations.Nullable;
 
  import java.io.IOException;
+ import java.io.UnsupportedEncodingException;
  import java.nio.file.Files;
  import java.nio.file.Path;
  import java.nio.file.Paths;
@@ -35,9 +36,8 @@
       * this interface is used to provide a lambda to decrypt a string when calling {@link #set}, {@link #get}, {@link #exists} and {@link #isFull}
       */
      public interface Decrypter {
-         String decrypt(String encrypted) throws GeneralSecurityException;
+         String decrypt(String encrypted) throws GeneralSecurityException, UnsupportedEncodingException;
      }
-
      /**
       * The maximum number of records a single user can have
       */
@@ -171,6 +171,14 @@
          return map.get(recordId);
      }
 
+     /**
+      * @param userId    user associated with record to remove
+      * @param recordId  the record to remove
+      * @param decrypter function to decrypt data
+      * @param encrypter function to encrypt data
+      * @throws IOException              on failure to load or store database file
+      * @throws GeneralSecurityException if encryption fails
+      */
      public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          if (!map.containsKey(recordId)) {
