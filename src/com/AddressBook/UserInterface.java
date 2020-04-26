@@ -8,8 +8,8 @@
 
  import com.AddressBook.Command.Command;
 
- import java.util.Scanner;
- import java.util.regex.Pattern;
+
+import java.io.Console;
 
  public class UserInterface {
     private String commands[] = new String[13];
@@ -97,9 +97,9 @@
                     while(!confirmed)
                     {
                         System.out.println("Please enter your new password");
-                        newPw = cnsl.readLine();
+                        newPw = cnsl.readPassword();
                         System.out.println("Please confirm your new password");
-                        if(cnsl.readLine().equals(newPw))
+                        if(cnsl.readPassword().equals(newPw))
                         {
                             confirmed = true;
                         }
