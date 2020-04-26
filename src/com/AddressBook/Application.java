@@ -1,18 +1,19 @@
- /*
-  * Title:          com.AddressBook.Application
-  * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
-  * Last Modified:  4/24/20
-  * Description: This class drives the functionality of the address program and is the class to be called
-  * upon boot of the system (Application.main(args)).  It consequentially handles logging, command input, 
-  * command execution, authorization, and authentication, and error reporting.
-  * */
- package com.AddressBook;
+/*
+ * Title:          com.AddressBook.Application
+ * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
+ * Last Modified:  4/24/20
+ * Description: This class drives the functionality of the address program and is the class to be called
+ * upon boot of the system (Application.main(args)).  It consequentially handles logging, command input, 
+ * command execution, authorization, and authentication, and error reporting.
+ * */
+package com.AddressBook;
 
 import java.io.IOException;
 import java.util.Scanner;
 
 import com.AddressBook.User;
-import com.Addressbook.UserInterface;
+import com.AddressBook.Command.Command;
+import com.AddressBook.Command.CommandException;
 import com.AddressBook.Authorization;
 
 public class Application {
@@ -59,7 +60,7 @@ public class Application {
 
     public static void main(String[] args) {
         //initialize system to a state of no user
-        User.setUser(null);
+        User.getInstance().setUser(null, null);
         //execute program
         run();
     }

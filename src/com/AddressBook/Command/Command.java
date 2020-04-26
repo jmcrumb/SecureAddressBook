@@ -13,8 +13,6 @@
      protected String authorizedCode;
      protected String unauthorizedCode;
 
-     private final int maxPriviledge = 2;
-
      /**
       * Creates a Command object
       *
@@ -84,6 +82,6 @@
       * @return String to be determined by implementation
       * @throws CommandException
       */
-      abstract String execute() throws Exception;
+      abstract public String execute() throws Exception;
 
  }
