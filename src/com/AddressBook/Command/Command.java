@@ -8,6 +8,12 @@
  package com.AddressBook.Command;
 
  public abstract class Command {
+  
+     protected static final int CODE_NONE = 0;
+     protected static final int CODE_USER = 1;
+     protected static final int CODE_ADMIN = 2;
+
+  
      public final int authRequirement;
      protected String input;
      protected String authorizedCode;
