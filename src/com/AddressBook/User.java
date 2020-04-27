@@ -23,11 +23,9 @@ public class User {
     }
 
 
-
     public static User getInstance() {
         return instance;
     }
-
 
 
     public void setUser(UserEntry entry, String DBKey) {
@@ -36,7 +34,7 @@ public class User {
     }
 
     public String getUserId() {
-        return entry.getUserId();
+        return entry.userId;
     }
 
 

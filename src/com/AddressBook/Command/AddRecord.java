@@ -18,6 +18,7 @@
 
  import java.io.IOException;
  import java.io.UnsupportedEncodingException;
+ import java.security.GeneralSecurityException;
  import java.util.Scanner;
 
  import com.AddressBook.User;
@@ -73,7 +74,7 @@
       * Otherwise, there is no change to the system.
       */
      @Override
-     public String execute() throws CommandException, IOException {
+     public String execute() throws CommandException, IOException, GeneralSecurityException {
          parseInput();
          writeToDatabase();
          return "OK";
@@ -81,10 +82,10 @@
 
      /**
       * Parses input for the command.
-      * 
+      *
       * @throws CommandException if expectations are violated
       */
-     protected void parseInput() throws CommandException, IOException {
+     protected void parseInput() throws CommandException, IOException, GeneralSecurityException {
          Scanner scanner = new Scanner(input);
          parseID(scanner.next());
          while (scanner.hasNext()) {
@@ -95,81 +96,82 @@
 
      /**
       * Validates and parses the record ID.
-      * 
+      *
       * @param arg record ID field
       * @throws CommandException if field does not match expectations for the record
       *                          ID
       * @throws IOException      if there is an issue interacting with the database
       */
-     protected void parseID(String arg) throws CommandException, IOException, UnsupportedEncodingException {
-        if(!validateInput(input, MAX_RECORD_FIELD_SIZE))
-            throw new CommandException("Invalid recordID");
-        recordID = arg.trim();
-        User usr = User.getInstance();
-        AddressEntry ae = AddressDatabase.getInstance().get(usr.getUserId(), 
-                          recordID, usr::decrypt);
-        if(ae != null)
-            throw new CommandException("Duplicate recordID");
-    }
+     protected void parseID(String arg) throws CommandException, IOException, GeneralSecurityException {
+         if (!validateInput(input, MAX_RECORD_FIELD_SIZE))
+             throw new CommandException("Invalid recordID");
+         recordID = arg.trim();
+         User usr = User.getInstance();
+         AddressEntry ae = AddressDatabase.getInstance().get(usr.getUserId(),
+           recordID, usr::decrypt);
+         if (ae != null)
+             throw new CommandException("Duplicate recordID");
+     }
 
-    /**
-     * Parses a single argument of the form "field=value".
-     * 
-     * @param arg argument to be parsed
-     * @throws CommandException if expectations are violated.
-     */
-    protected void parseArg(String arg) throws CommandException {
-        int eqIndex = arg.indexOf('=');
-        if(eqIndex == -1)
-            throw new CommandException("One or more invalid record data fields");
-        String val = arg.substring(eqIndex + 1).trim();
-        if(!validateInput(val, MAX_RECORD_FIELD_SIZE))
-            throw new CommandException("One or more invalid record data fields");
-        switch(arg.substring(0, eqIndex)) {
-            case "SN":
-                SN = val;
-                break;
-            case "GN":
-                GN = val;
-                break;
-            case "PEM":
-                PEM = val;
-                break;
-            case "WEM":
-                WEM = val;
-                break;
-            case "PPH":
-                PPH = val;
-                break;
-            case "WPH":
-                WPH = val;
-                break;
-            case "SA":
-                SA = val;
-                break;
-            case "CITY":
-                CITY = val;
-                break;
-            case "STP":
-                STP = val;
-                break;
-            case "CTY":
-                CTY = val;
-                break;
-            case "PC":
-                PC = val;
-                break;
-            default:
-                throw new CommandException("One or more invalid record data fields");
-        }
-    }
+     /**
+      * Parses a single argument of the form "field=value".
+      *
+      * @param arg argument to be parsed
+      * @throws CommandException if expectations are violated.
+      */
+     protected void parseArg(String arg) throws CommandException {
+         int eqIndex = arg.indexOf('=');
+         if (eqIndex == -1)
+             throw new CommandException("One or more invalid record data fields");
+         String val = arg.substring(eqIndex + 1).trim();
+         if (!validateInput(val, MAX_RECORD_FIELD_SIZE))
+             throw new CommandException("One or more invalid record data fields");
+         switch (arg.substring(0, eqIndex)) {
+             case "SN":
+                 SN = val;
+                 break;
+             case "GN":
+                 GN = val;
+                 break;
+             case "PEM":
+                 PEM = val;
+                 break;
+             case "WEM":
+                 WEM = val;
+                 break;
+             case "PPH":
+                 PPH = val;
+                 break;
+             case "WPH":
+                 WPH = val;
+                 break;
+             case "SA":
+                 SA = val;
+                 break;
+             case "CITY":
+                 CITY = val;
+                 break;
+             case "STP":
+                 STP = val;
+                 break;
+             case "CTY":
+                 CTY = val;
+                 break;
+             case "PC":
+                 PC = val;
+                 break;
+             default:
+                 throw new CommandException("One or more invalid record data fields");
+         }
+     }
 
-    /**
-     * Writes the fields into an AddressEntry to be passed to the Address Database for handling.
-     */
-    protected void writeToDatabase() throws IOException, UnsupportedEncodingException{
-        AddressEntry ae = new AddressEntry(SN, GN, PEM, WEM, PPH, WPH, SA, CITY, STP, CTY, PC);
-        User usr = User.getInstance();
-        AddressDatabase.getInstance().set(User.getInstance().getUserId(), ae, usr::decrypt, usr::encrypt);
-    }
+     /**
+      * Writes the fields into an AddressEntry to be passed to the Address Database for handling.
+      */
+     protected void writeToDatabase() throws IOException, GeneralSecurityException {
+//        AddressEntry ae = new AddressEntry()
+         AddressEntry ae = new AddressEntry(recordID, SN, GN, PEM, WEM, PPH, WPH, SA, CITY, STP, CTY, PC);
+         User usr = User.getInstance();
+         AddressDatabase.getInstance().set(User.getInstance().getUserId(), ae, usr::decrypt, usr::encrypt);
+     }
  }

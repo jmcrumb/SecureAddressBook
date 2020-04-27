@@ -30,17 +30,17 @@ import com.AddressBook.Command.Command;
 import com.AddressBook.Command.CommandException;
 import com.AddressBook.Database.AddressDatabase;
 
-public class GetRecord extends Command{
+public class GetRecord extends Command {
 
     /**
      * Construts a GetRecord object.
-     * 
+     *
      * @param input input from the command line
      */
     public GetRecord(String input) {
         super(input, 1, null, null);
     }
-    
+
     /**
      * This operation is used to display a record in the database of the currently active user. If
      * no recordID is specified then every record in the database for the currently active user
@@ -58,50 +58,50 @@ public class GetRecord extends Command{
     public String execute() throws CommandException, IOException, GeneralSecurityException {
         Scanner scanner = new Scanner(input.trim());
         String recordID = scanner.next();
-        if(!validateInput(recordID))
+        if (!validateInput(recordID))
             throw new CommandException("Invalid recordID");
         User usr = User.getInstance();
-        AddressEntry ae = 
-            AddressDatabase.getInstance().get(usr.getUserId(), 
-                                              recordID, usr::decrypt);
-        
+        AddressEntry ae =
+          AddressDatabase.getInstance().get(usr.getUserId(),
+            recordID, usr::decrypt);
+
         String queryResult = parseFields(scanner, ae);
         return "OK\n" + queryResult;
     }
 
     /**
      * Parses the fields passed in via input.
-     * 
+     *
      * @param scanner Scanner containing input
-     * @param ae AddressEntry associated with the recordID in the input
+     * @param ae      AddressEntry associated with the recordID in the input
      * @return A String representation of the record in question
      */
-    private String parseFields(Scanner scanner, AddressEntry ae) {
-        if(!scanner.hasNext())
-            return String.format("SN,N,PEM,WEM,PPH,WPH,SA,CITY,STP,CTY,PC\n" + 
-                                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", 
-                                ae.SN, ae.GN, ae.PEM, ae.WEM, ae.PPH, ae. WPH, ae.SA, ae.CITY, ae.STP, ae.CTY, ae.PC);
-        String queryResult = "";
-        String fields = "";
-        while(scanner.hasNext()) {
+    private String parseFields(Scanner scanner, AddressEntry ae) throws CommandException {
+        if (!scanner.hasNext())
+            return String.format("SN,N,PEM,WEM,PPH,WPH,SA,CITY,STP,CTY,PC\n" +
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+              ae.SN, ae.GN, ae.PEM, ae.WEM, ae.PPH, ae.WPH, ae.SA, ae.CITY, ae.STP, ae.CTY, ae.PC);
+        StringBuilder queryResult = new StringBuilder();
+        StringBuilder fields = new StringBuilder();
+        while (scanner.hasNext()) {
             String field = scanner.next();
-            fields += field + ",";
-            queryResult += getField(field, ae) + ",";
+            fields.append(field).append(",");
+            queryResult.append(getField(field, ae)).append(",");
         }
-        return fields+"\n"+queryResult;
+        return fields + "\n" + queryResult;
     }
 
     /**
      * Accesses a field of an AddressEntry ae.
-     * 
+     *
      * @param field Field to be accessed
-     * @param ae AddressEntry in question
-     * @throws CommandException if the field name is not recognized
+     * @param ae    AddressEntry in question
      * @return value of field in ae
+     * @throws CommandException if the field name is not recognized
      */
-    private String getField(String field, AddressEntry ae) throws CommandException{
+    private String getField(String field, AddressEntry ae) throws CommandException {
         String val = "";
-        switch(field) {
+        switch (field) {
             case "SN":
                 val = ae.SN;
                 break;
@@ -138,6 +138,7 @@ public class GetRecord extends Command{
             default:
                 throw new CommandException("One or more invalid record data fields");
         }
+        return val;
     }
 
- }
+}

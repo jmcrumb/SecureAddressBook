@@ -6,14 +6,8 @@
   * */
  package com.AddressBook.UserEntry;
 
- public class AdminEntry {
-    final String adminid;
-    final String adminpw;
-    final int authLevel;
-    public AdminEntry(UserEntry entry)
-    {
-        this.adminid = entry.userid;
-        this.adminpw = entry.pwhash;
-        this.authLevel = 2;
-    }
+ public class AdminEntry extends UserEntry {
+     public AdminEntry(UserEntry entry) {
+         super(entry);
+     }
  }

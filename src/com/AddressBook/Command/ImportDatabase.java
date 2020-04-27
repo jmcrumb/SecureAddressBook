@@ -20,14 +20,11 @@
 
  public class ImportDatabase extends Command {
      /**
-      * Creates a Command object
+      * Creates a ImportDatabase object
       *
       * @param input            Input for the command
-      * @param authRequirement  The authorization level requirement {0:none, 1:user, 2:admin}
-      * @param authorizedCode   String representation of authorization for the log
-      * @param unauthorizedCode String representation of unauthorization for the log
       */
-     public ImportDatabase(String input, int authRequirement, String authorizedCode, String unauthorizedCode) {
+     public ImportDatabase(String input) {
          super(input.trim(), 1, null, null);
      }
 
