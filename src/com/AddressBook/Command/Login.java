@@ -17,7 +17,7 @@ import com.AddressBook.User;
 public class Login extends Command {
 
     public Login(String input) {
-        super(input, 0, "", "");
+        super(input, 0, "LS", "LF");
     }
 
     @Deprecated
