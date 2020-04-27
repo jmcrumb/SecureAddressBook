@@ -44,20 +44,21 @@ public class Login extends Command {
 
         if (entry == null) {
             throw new CommandException("Unknown Error");
-        } else if (entry.password != password) {
+        }
+        else if (entry.password == null) {
+            // case 5 (first time login)
+            database.set(new UserEntry(userid, password));
+        }
+        else if (entry.password != password) {
             // case 3 (invalid password)
             return "Invalid Credentials";
         } else if (entry.password != null) {
             // case 4 (correct username and password)
             User.getInstance().setUser(entry, password);
-        } else if (entry.password == null) {
-            // case 5 (first time login)
-            database.set(new UserEntry(userid, password));
         } else {
             throw new CommandException("Unknown Error");
         }
+        
         return "OK";
-
-
     }
 }
