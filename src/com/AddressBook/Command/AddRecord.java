@@ -17,93 +17,97 @@
  package com.AddressBook.Command;
 
  import java.io.IOException;
-import java.util.Scanner;
+ import java.io.UnsupportedEncodingException;
+ import java.util.Scanner;
 
-import com.AddressBook.User;
-import com.AddressBook.Command.CommandException;
-import com.AddressBook.AddressEntry;
-import com.AddressBook.Database.AddressDatabase;
-import com.AddressBook.Encryption;
+ import com.AddressBook.User;
+ import com.AddressBook.Command.CommandException;
+ import com.AddressBook.AddressEntry;
+ import com.AddressBook.Database.AddressDatabase;
+ import com.AddressBook.Encryption;
 
- public class AddRecord extends Command{
+ public class AddRecord extends Command {
 
-    protected String recordID;
-    protected String SN;
-    protected String GN;
-    protected String PEM;
-    protected String WEM;
-    protected String PPH;
-    protected String WPH;
-    protected String SA;
-    protected String CITY;
-    protected String STP;
-    protected String CTY;
-    protected String PC;
+     protected String recordID;
+     protected String SN;
+     protected String GN;
+     protected String PEM;
+     protected String WEM;
+     protected String PPH;
+     protected String WPH;
+     protected String SA;
+     protected String CITY;
+     protected String STP;
+     protected String CTY;
+     protected String PC;
 
-    private final int MAX_RECORD_FIELD_SIZE = 64;
+     private final int MAX_RECORD_FIELD_SIZE = 64;
 
-    public AddRecord(String input) {
-        super(input, 1, null, null);
-        recordID = null;
-        SN = null;
-        GN = null;
-        PEM = null;
-        WEM = null;
-        PPH = null;
-        WPH = null;
-        SA = null;
-        CITY = null;
-        STP = null;
-        CTY = null;
-        PC = null;
-    }
+     public AddRecord(String input) {
+         super(input, 1, null, null);
+         recordID = null;
+         SN = null;
+         GN = null;
+         PEM = null;
+         WEM = null;
+         PPH = null;
+         WPH = null;
+         SA = null;
+         CITY = null;
+         STP = null;
+         CTY = null;
+         PC = null;
+     }
 
-    /**
-     * This operation is used to add a new record to a database. Several conditions must be
-     * met for the operation to succeed:<br>
-     * 1. A non-admin user must be currently logged-in.<br>
-     * 2. The record data provided must include a recordID.<br>
-     * 3. All record field identifiers are valid.<br>
-     * 4. All record fields must satisfy formatting requirements.<br>
-     * 5. There must not already be a record in the database with that recordID.<p>
-     * If these conditions are satisfied, the operation succeeds and a record with the input
-     * data is created in the database for the currently active user. Otherwise, there is no
-     * change to the system.
-     */
-    @Override
-    public String execute() throws CommandException, IOException {
-        parseInput();
-        writeToDatabase();
-        return "OK";
-    }
+     /**
+      * This operation is used to add a new record to a database. Several conditions
+      * must be met for the operation to succeed:<br>
+      * 1. A non-admin user must be currently logged-in.<br>
+      * 2. The record data provided must include a recordID.<br>
+      * 3. All record field identifiers are valid.<br>
+      * 4. All record fields must satisfy formatting requirements.<br>
+      * 5. There must not already be a record in the database with that recordID.
+      * <p>
+      * If these conditions are satisfied, the operation succeeds and a record with
+      * the input data is created in the database for the currently active user.
+      * Otherwise, there is no change to the system.
+      */
+     @Override
+     public String execute() throws CommandException, IOException {
+         parseInput();
+         writeToDatabase();
+         return "OK";
+     }
 
-    /**
-     * Parses input for the command.
-     * 
-     * @throws CommandException if expectations are violated
-     */
-    protected void parseInput() throws CommandException {
-        Scanner scanner = new Scanner(input);
-        parseID(scanner.next());
-        while(scanner.hasNext()) {
-            parseArg(scanner.next());
-        }
-        scanner.close();    
-    }
+     /**
+      * Parses input for the command.
+      * 
+      * @throws CommandException if expectations are violated
+      */
+     protected void parseInput() throws CommandException, IOException {
+         Scanner scanner = new Scanner(input);
+         parseID(scanner.next());
+         while (scanner.hasNext()) {
+             parseArg(scanner.next());
+         }
+         scanner.close();
+     }
 
-    /**
-     * Validates and parses the record ID. 
-     * 
-     * @param arg record ID field
-     * @throws CommandException if field does not match expectations for the record ID
-     * @throws IOException if there is an issue interacting with the database
-     */
-    protected void parseID(String arg) throws CommandException, IOException {
+     /**
+      * Validates and parses the record ID.
+      * 
+      * @param arg record ID field
+      * @throws CommandException if field does not match expectations for the record
+      *                          ID
+      * @throws IOException      if there is an issue interacting with the database
+      */
+     protected void parseID(String arg) throws CommandException, IOException, UnsupportedEncodingException {
         if(!validateInput(input, MAX_RECORD_FIELD_SIZE))
             throw new CommandException("Invalid recordID");
         recordID = arg.trim();
-        AddressEntry ae = AddressDatabase.getInstance().get(User.getInstance().getUserId(), 
-                          recordID, (String s) -> Encryption.decrypt(s));
+        User usr = User.getInstance();
+        AddressEntry ae = AddressDatabase.getInstance().get(usr.getUserId(), 
+                          recordID, usr::decrypt);
         if(ae != null)
             throw new CommandException("Duplicate recordID");
     }
@@ -114,7 +118,7 @@ import com.AddressBook.Encryption;
      * @param arg argument to be parsed
      * @throws CommandException if expectations are violated.
      */
-    protected void parseArg(String arg) throws CommandException{
+    protected void parseArg(String arg) throws CommandException {
         int eqIndex = arg.indexOf('=');
         if(eqIndex == -1)
             throw new CommandException("One or more invalid record data fields");
@@ -163,10 +167,9 @@ import com.AddressBook.Encryption;
     /**
      * Writes the fields into an AddressEntry to be passed to the Address Database for handling.
      */
-    protected void writeToDatabase() throws IOException{
+    protected void writeToDatabase() throws IOException, UnsupportedEncodingException{
         AddressEntry ae = new AddressEntry(SN, GN, PEM, WEM, PPH, WPH, SA, CITY, STP, CTY, PC);
-        AddressDatabase.getInstance().set(User.getInstance().getUserId(), ae,
-                                        (String s) -> Encryption.decrypt(s),
-                                        (String s) -> Encryption.encrypt(s));
+        User usr = User.getInstance();
+        AddressDatabase.getInstance().set(User.getInstance().getUserId(), ae, usr::decrypt, usr::encrypt);
     }
  }
