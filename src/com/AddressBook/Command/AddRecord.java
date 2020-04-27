@@ -96,11 +96,16 @@ import com.AddressBook.Encryption;
      * 
      * @param arg record ID field
      * @throws CommandException if field does not match expectations for the record ID
+     * @throws IOException if there is an issue interacting with the database
      */
-    protected void parseID(String arg) throws CommandException{
+    protected void parseID(String arg) throws CommandException, IOException {
         if(!validateInput(input, MAX_RECORD_FIELD_SIZE))
             throw new CommandException("Invalid recordID");
         recordID = arg.trim();
+        AddressEntry ae = AddressDatabase.getInstance().get(User.getInstance().getUserId(), 
+                          recordID, (String s) -> Encryption.decrypt(s));
+        if(ae != null)
+            throw new CommandException("Duplicate recordID");
     }
 
     /**
