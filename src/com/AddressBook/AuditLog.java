@@ -1,14 +1,16 @@
- /*
-  * Title:          com.AddressBook
-  * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
-  * Last Modified:  4/22/20
-  * Description:
-  * */
- package com.AddressBook;
- import java.io.File;
- import java.io.FileWriter;
- import java.io.IOException;
+/*
+ * Title:          com.AddressBook
+ * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
+ * Last Modified:  4/22/20
+ * Description:
+ * */
+package com.AddressBook;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import com.AddressBook.Command.Command;
 import com.AddressBook.Database.UserDatabase;
 
  public class AuditLog {

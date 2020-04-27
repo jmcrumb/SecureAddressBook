@@ -6,7 +6,6 @@
  * */
 package com.AddressBook;
 
-import com.AddressBook.Encryption;
 import com.AddressBook.UserEntry.*;
 
 public class User {
