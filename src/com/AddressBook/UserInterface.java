@@ -76,7 +76,7 @@ import java.io.Console;
         switch(sub)
         {
             case "LIN": //username + ";" + plain text pw
-                Console lincnsl = null
+                Console lincnsl = null;
                 String[] linargs = commandString.split(" ");   //*will add if args.length < 3
                 String linuser = linargs[1];
                 String linpw = linargs[2];
@@ -85,16 +85,20 @@ import java.io.Console;
                 {
                     try
                     {
-                        lincnsl = System.Console();
+                        lincnsl = System.console();
                         boolean cnfrm = false;
                         while(!cnfrm)
                         {
                             System.out.println("Please confirm your desired password:\n");
-                            if(cnsl.readLine().equals(linpw)
+                            if(lincnsl.readLine().equals(linpw))
                             {
                                 cnfrm = true;
                             }
                         }
+                    }
+                    catch(Exception e)
+                    {
+                        System.out.println("Error parsing command through console\n");
                     }
                 }
                 String lininput = linuser + ";" + linpw;
