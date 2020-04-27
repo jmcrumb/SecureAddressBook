@@ -16,7 +16,17 @@
   
      public final int authRequirement;
      protected String input;
+
+     public String getAuthorizedCode() {
+         return authorizedCode;
+     }
+
      protected String authorizedCode;
+
+     public String getUnauthorizedCode() {
+         return unauthorizedCode;
+     }
+
      protected String unauthorizedCode;
 
      /**

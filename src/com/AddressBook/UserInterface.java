@@ -18,12 +18,14 @@
      public Command getNextCommand() {
          try {
              Console cnsl = System.console();
+
              while (true) {
                  String fullString = cnsl.readLine();   //recieves the next command line
                 //  String cmdString = fullString.substring(0, 3); //recieves the first 3 characters of the command line (the command codes)
                  return commandParse(fullString);
              }
          } catch (Exception e) {
+             e.printStackTrace();
              throw new RuntimeException("Error getting next command.");
          }
      }

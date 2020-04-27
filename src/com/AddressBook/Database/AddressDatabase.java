@@ -7,8 +7,7 @@
  package com.AddressBook.Database;
 
  import com.AddressBook.AddressEntry;
- import org.jetbrains.annotations.NotNull;
- import org.jetbrains.annotations.Nullable;
+
 
  import java.io.IOException;
  import java.io.UnsupportedEncodingException;
@@ -66,7 +65,7 @@
       * @return the encrypted contents of the user record
       * @throws IOException if it fails to read the file
       */
-     private @Nullable String readFile(String userId) throws IOException {
+     private  String readFile(String userId) throws IOException {
          Path path = Paths.get(FOLDER_NAME, FILE_PREFIX + userId);
          if (!Files.exists(path)) {
              return null;
@@ -99,8 +98,8 @@
       * @return map of the data loaded from the file
       * @throws IOException if fails to read file or misformatted
       */
-     private @NotNull Map<String, AddressEntry> getMapFromFile(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
-         @Nullable String encypted = readFile(userId);
+     private Map<String, AddressEntry> getMapFromFile(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+          String encypted = readFile(userId);
          if (encypted == null) {
              return new HashMap<>();
          } else {
@@ -117,7 +116,7 @@
       * @return a map of the data passed in
       * @throws IOException if there are duplicates
       */
-     private @NotNull Map<String, AddressEntry> getMapFromString(@NotNull String data) throws IOException {
+     private  Map<String, AddressEntry> getMapFromString( String data) throws IOException {
          String[] lines = data.split("\n");
          Map<String, AddressEntry> m = new HashMap<>(lines.length);
          for (String line : lines) {
@@ -136,8 +135,7 @@
       * @param m         the map of data to store in the file
       * @throws IOException if fails to write
       */
-     private void setFileFromMap(String userId, @NotNull Encrypter encrypter, @NotNull Map<String, AddressEntry> m)
-             throws IOException, GeneralSecurityException {
+     private void setFileFromMap(String userId, Encrypter encrypter, Map<String, AddressEntry> m) throws IOException, GeneralSecurityException {
          StringBuilder sb = new StringBuilder();
          m.forEach((k, v) -> {
              sb.append(v.toString()).append("\n");
@@ -168,8 +166,9 @@
       * @return the record with the passed id
       * @throws IOException if database fails to load from file
       */
-     public @Nullable AddressEntry get(String userId, String recordId, Decrypter decrypter)
-             throws IOException, GeneralSecurityException {
+
+     public  AddressEntry get(String userId, String recordId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+
          instantiateMapIfNeeded(userId, decrypter);
          return map.get(recordId);
      }
@@ -260,9 +259,9 @@
       * @param data      CSV data to add
       * @throws IOException if fails to read or write db file
       */
-     public void importDB(String userId, Decrypter decrypter, Encrypter encrypter, @NotNull String data) throws IOException, GeneralSecurityException {
+     public void importDB(String userId, Decrypter decrypter, Encrypter encrypter, String data) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
-         @NotNull Map<String, AddressEntry> m = getMapFromString(data);
+          Map<String, AddressEntry> m = getMapFromString(data);
          for (Map.Entry<String, AddressEntry> entry : m.entrySet()) {
              if (map.containsKey(entry.getKey())) {
                  throw new IOException("Duplicate recordID");
