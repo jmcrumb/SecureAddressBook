@@ -113,6 +113,7 @@
          List<String> l = readFile();
          if (l == null) {
              map = new HashMap<>();
+             map.put("admin", new UserEntry("admin", null));
          } else {
              // check to make sure hasn't been modified to be oversized
              if (l.size() > MAX_ACCOUNTS) {
