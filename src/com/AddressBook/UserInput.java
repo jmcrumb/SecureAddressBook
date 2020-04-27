@@ -13,7 +13,7 @@ public class UserInput {
     }
 
 
-    public UserInput getInstance() {
+    public static UserInput getInstance() {
         return instance;
     }
 
@@ -23,7 +23,7 @@ public class UserInput {
     }
 
     public void sendOutput(String output) {
-        cnsl.writer().println(output);
+        cnsl.writer().print(output);
     }
 
 }
