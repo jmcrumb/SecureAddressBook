@@ -32,6 +32,7 @@ public class Application {
                 ui.sendResponse("The current user is not authorized");
             } catch (Exception e) {
                 ui.sendResponse("An unknown error has occurred");
+                break;
             }
         }
     }

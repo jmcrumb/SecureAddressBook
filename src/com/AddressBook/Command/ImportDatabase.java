@@ -8,7 +8,7 @@
 
  import com.AddressBook.Database.AddressDatabase;
  import com.AddressBook.User;
- import org.jetbrains.annotations.NotNull;
+
 
  import java.io.IOException;
  import java.nio.file.Files;
@@ -34,7 +34,7 @@
       * @param user the user to check
       * @throws CommandException if user cannot access command
       */
-     private void verifyUser(@NotNull User user) throws CommandException {
+     private void verifyUser( User user) throws CommandException {
          if (user.getAuthorization() != this.authRequirement) {
              if (user.getAuthorization() == Command.CODE_ADMIN) {
                  throw new CommandException("Admin not authorized");
@@ -46,7 +46,7 @@
          }
      }
 
-     private @NotNull Path checkInput() throws CommandException {
+     private  Path checkInput() throws CommandException {
          if (input.equals("")) {
              throw new CommandException("No Input_file specified");
          }

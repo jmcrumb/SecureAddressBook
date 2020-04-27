@@ -24,10 +24,11 @@
      public Command getNextCommand() {
          try {
              Console cnsl = System.console();
+
              while (true) {
                  String fullString = cnsl.readLine();   //recieves the next command line
                  String cmdString = fullString.substring(0, 2); //recieves the first 3 characters of the command line (the command codes)
-
+                 System.out.println();
                  if (commands.contains(cmdString.toUpperCase())) {
                      Command c = commandParse(fullString);
                      if (c != null) {
@@ -38,6 +39,7 @@
 
              }
          } catch (Exception e) {
+             e.printStackTrace();
              throw new RuntimeException("Error getting next command.");
          }
      }
