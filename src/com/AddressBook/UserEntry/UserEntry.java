@@ -8,15 +8,17 @@
 
 public class UserEntry
 {
-    final String userid;
-    final String pwhash;
-    final int authLevel;
+    final public String userid;
+    final public String pwhash;
+    final public int authLevel;
+    final public boolean hasLoggedIn;
 
     public UserEntry(String userid, String pwhash, int authLevel)
     {
         this.userid = userid;
         this.pwhash = pwhash;
         this.authLevel = authLevel;
+        this.hasLoggedIn = false;
     }
 
     public UserEntry(String userEntryString)    //uncertain about this: both constructors just take strings
@@ -27,6 +29,7 @@ public class UserEntry
             sendResponse("invalid user entry string \n");
             this.userid = null;
             this.pwhash = null;
+            this.hasLoggedIn = null;
         }
  
 //       else if(fields.length > 2)
