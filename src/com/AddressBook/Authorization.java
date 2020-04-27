@@ -19,6 +19,8 @@ import com.AddressBook.Command.Command;
      * is successful
      */
     public static boolean verify(Command command) {
+        if(command.authRequirement == 3)
+            return true;
         return User.getInstance().getAuthorization() == command.authRequirement;
     }
  }
