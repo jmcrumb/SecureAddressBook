@@ -17,15 +17,12 @@
  package com.AddressBook.Command;
 
  import java.io.IOException;
- import java.io.UnsupportedEncodingException;
  import java.security.GeneralSecurityException;
  import java.util.Scanner;
 
  import com.AddressBook.User;
- import com.AddressBook.Command.CommandException;
  import com.AddressBook.AddressEntry;
  import com.AddressBook.Database.AddressDatabase;
- import com.AddressBook.Encryption;
 
  public class AddRecord extends Command {
 

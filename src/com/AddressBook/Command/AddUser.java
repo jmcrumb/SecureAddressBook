@@ -8,7 +8,6 @@ package com.AddressBook.Command;
 
 import java.io.IOException;
 
-import com.AddressBook.User;
 import com.AddressBook.Database.UserDatabase;
 import com.AddressBook.UserEntry.UserEntry;
 
