@@ -19,6 +19,8 @@
 package com.AddressBook.Command;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.Scanner;
 
 import com.AddressBook.AddressEntry;
@@ -53,7 +55,7 @@ public class GetRecord extends Command{
      * There is no change to the system whether the operation succeeds or not.
      */
     @Override
-    public String execute() throws CommandException, IOException {
+    public String execute() throws CommandException, IOException, GeneralSecurityException {
         Scanner scanner = new Scanner(input.trim());
         String recordID = scanner.next();
         if(!validateInput(recordID))
