@@ -10,7 +10,7 @@ package com.AddressBook.Command;
 public class Exit extends Command {
 
     public Exit(String input) {
-        super(input, 0, "Program exited", "Program exited");
+        super(input, 0, null, null);
     }
 
     @Override
