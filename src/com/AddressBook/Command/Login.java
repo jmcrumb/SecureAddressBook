@@ -14,8 +14,8 @@ import java.io.IOException;
 import com.AddressBook.Encryption;
 import com.AddressBook.User;
 
- public class Login extends Command {
-    
+public class Login extends Command {
+
     public Login(String input) {
         super(input, 0, "", "");
     }
@@ -26,7 +26,7 @@ import com.AddressBook.User;
         if (User.getInstance().getUserId() != null) {
             return "An account is currently active; logout before proceeding";
         }
-        
+
         String[] splitInput = input.split(" ");
         if (splitInput.length < 2) {
             throw new CommandException("A username and password must be provided.");
@@ -34,24 +34,30 @@ import com.AddressBook.User;
         String userid = splitInput[0];
         String password = Encryption.hashBCrypt(splitInput[1]);
 
+        UserDatabase database = UserDatabase.getInstance();
 
         // case 2 (user doesn't exist)
-        if (!UserDatabase.getInstance().exists(userid)) return "Invalid Credentials";
+        if (!database.exists(userid)) return "Invalid Credentials";
 
-        // case 4 (correct username and password)
-        UserEntry entry = UserDatabase.getInstance().get(userid);
-        if (entry != null && (entry.password == password)) {
-            User.getInstance().setUser(entry, password);
-            return "OK";
-        }
-        else {
+
+        UserEntry entry = database.get(userid);
+
+        if (entry == null) {
+            throw new CommandException("Unknown Error");
+        } else if (entry.password != password) {
             // case 3 (invalid password)
             return "Invalid Credentials";
+        } else if (entry.password != null) {
+            // case 4 (correct username and password)
+            User.getInstance().setUser(entry, password);
+        } else if (entry.password == null) {
+            // case 5 (first time login)
+            database.set(new UserEntry(userid, password));
+        } else {
+            throw new CommandException("Unknown Error");
         }
+        return "OK";
 
-        // case 5 (first time login)
-        // TO-DO
 
-        return null;
     }
- }
+}
