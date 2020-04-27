@@ -30,12 +30,6 @@ public class ChangePassword extends Command {
             return "Invalid credentials";
         }
 
-
-        // credentials are correct
-        // prompt new password
-        // reenter new password
-        
-
-        return null;
+        return "OK";
     }
  }
