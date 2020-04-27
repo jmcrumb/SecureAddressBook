@@ -15,6 +15,7 @@
  import com.AddressBook.Database.UserDatabase;
  import com.AddressBook.UserEntry.UserEntry;
 
+
  public class AuditLog {
 
     private static AuditLog logInstance;

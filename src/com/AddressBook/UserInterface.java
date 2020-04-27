@@ -55,7 +55,7 @@
              case "DEU":
                  return new DeleteUser(commandString.substring(divider).trim());
              case "DAL":
-                //  return new DisplayAuditLog(commandString.substring(3));
+                 return new DisplayAuditLog(commandString.substring(3));
              case "ADR":
                  return new AddRecord(commandString.substring(divider).trim());
 
