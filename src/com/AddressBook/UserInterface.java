@@ -12,9 +12,12 @@
 import java.io.Console;
 
  public class UserInterface {
+{
+    private boolean isLoggedIn;
     private String commands[] = new String[13];
     public UserInterface()         //initializes the commands array with all possible commands
     {
+        this.isLoggedIn = false;
         commands[0] = "LIN";
         commands[1] = "LOU";
         commands[2] = "CHP";
@@ -73,9 +76,27 @@ import java.io.Console;
         switch(sub)
         {
             case "LIN": //username + ";" + plain text pw
+                Console lincnsl = null
                 String[] linargs = commandString.split(" ");   //*will add if args.length < 3
-                String linuser = UserInterface.removeBrackets(linargs[1]);
-                String linpw = UserInterface.removeBrackets(linargs[2]);
+                String linuser = linargs[1];
+                String linpw = linargs[2];
+                UserDatabase ud = UserDatabase.getInstance();
+                if(!ud.get(linuser).getLoggedIn())
+                {
+                    try
+                    {
+                        lincnsl = System.Console();
+                        boolean cnfrm = false;
+                        while(!cnfrm)
+                        {
+                            System.out.println("Please confirm your desired password:\n");
+                            if(cnsl.readLine().equals(linpw)
+                            {
+                                cnfrm = true;
+                            }
+                        }
+                    }
+                }
                 String lininput = linuser + ";" + linpw;
                 Login logIn = new Login(lininput);
                 return logIn;
@@ -87,7 +108,7 @@ import java.io.Console;
             case "CHP": //username + ";" + plain text pw
                 ChangePassword changePassword = null;
                 String[] chpargs = commandString.split(" ");
-                String oldpw = UserInterface.removeBrackets(chpargs[1]); // *need to verify current password (waiting to see how login recieves pw from hash)
+                String oldpw = chpargs[1]; // *need to verify current password (waiting to see how login recieves pw from hash)
             
                 Console cnsl = null;
                 String newPw = "";
@@ -97,9 +118,9 @@ import java.io.Console;
                     while(!confirmed)
                     {
                         System.out.println("Please enter your new password");
-                        newPw = cnsl.readPassword();
+                        newPw = cnsl.readLine();
                         System.out.println("Please confirm your new password");
-                        if(cnsl.readPassword().equals(newPw))
+                        if(cnsl.readLine().equals(newPw))
                         {
                             confirmed = true;
                         }
@@ -161,18 +182,14 @@ import java.io.Console;
             case "HLP":
                 String hlpinput = parseBasicCommand(commandString);
                 UserInterface.helpHandler(hlpinput);
-            case default:
+                break;
+            case default: 
                 System.out.println("Command not found.\n");
         }
 
     }
 
-    public static String removeBrackets(String s)   //function to remove brackets from original syntax
-    {
-        s.replace("<","");
-        s.replace(">","");
-        return s;
-    }
+
 
     public static String parseBasicCommand(String cmdString)    //function to get the input string of the command easily
     {
@@ -184,65 +201,66 @@ import java.io.Console;
     {
         if(hlpinput == null)
         {
-            System.out.println("LIN <userID> <password>\n");
-            System.out.println("LOU\n");
-            System.out.println("CHP <old password>\n");
-            System.out.println("ADU <userID>\n");
-            System.out.println("DEU <userID>\n");
-            System.out.println("DAL <userID>\n");
-            System.out.println("ADR <recordID> [<field1 = value1> <field2 = value2>...]\n"); //**NEED TO DEAL WITH THIS SYNTAX
-            System.out.println("DER <recordID>\n");
-            System.out.println("EDR <recordID> [<field1 = value1> <field2 = value2>...]\n");
-            System.out.println("RER <recordID> [<fieldname> ...]\n");
-            System.out.println("IMD <Input_File>\n");
-            System.out.println("EXD <Output_File>\n");
-            System.out.println("HLP [<command name>]\n"); 
+            System.out.println("Login: LIN <userID> <password>\n");
+            System.out.println("Logout: LOU\n");
+            System.out.println("Change Password: CHP <old password>\n");
+            System.out.println("Add User: ADU <userID>\n");
+            System.out.println("Delete User: DEU <userID>\n");
+            System.out.println("Display Audit Log: DAL <userID>\n");
+            System.out.println("Add Record: ADR <recordID> [<field1 = value1> <field2 = value2>...]\n"); //**NEED TO DEAL WITH THIS SYNTAX
+            System.out.println("Delete Record: DER <recordID>\n");
+            System.out.println("Edit Record: EDR <recordID> [<field1 = value1> <field2 = value2>...]\n");
+            System.out.println("Read Record: RER <recordID> [<fieldname> ...]\n");
+            System.out.println("Import Database: IMD <Input_File>\n");
+            System.out.println("Export Database: EXD <Output_File>\n");
+            System.out.println("Help: HLP [<command name>]\n"); 
         }
         switch(hlpinput)
         {
             case "LIN":
-                System.out.println("LIN <userID> <password>\n");
+                System.out.println("Login: LIN <userID> <password>\n");
                 break;
             case "LOU":
-                System.out.println("LOU\n");
+                System.out.println("Logout: LOU\n");
                 break;
             case "CHP":
-                System.out.println("CHP <old password>\n");
+                System.out.println("Change password: CHP <old password>\n");
                 break;
             case "ADU":
-                System.out.println("ADU <userID>\n");
+                System.out.println("Add User: ADU <userID>\n");
                 break;
             case "DEU":
-                System.out.println("DEU <userID>\n");
+                System.out.println("Delete User: DEU <userID>\n");
                 break;
             case "DAL":
-                System.out.println("DAL <userID>\n");
+                System.out.println("Dsiplay Audit Log: DAL <userID>\n");
                 break;
             case "ADR":
-                System.out.println("ADR <recordID> [<field1 = value1> <field2 = value2>...]\n"); //**NEED TO DEAL WITH THIS SYNTAX
+                System.out.println("Add Record: ADR <recordID> [<field1 = value1> <field2 = value2>...]\n"); //**NEED TO DEAL WITH THIS SYNTAX
                 break;
             case "DER":
-                System.out.println("DER <recordID>\n");
+                System.out.println("Delete Record: DER <recordID>\n");
                 break;
             case "EDR":
-                System.out.println("EDR <recordID> [<field1 = value1> <field2 = value2>...]\n");
+                System.out.println("Edit Record: EDR <recordID> [<field1 = value1> <field2 = value2>...]\n");
                 break;
             case "RER":
-                System.out.println("RER <recordID> [<fieldname> ...]\n");
+                System.out.println("Read Record: RER <recordID> [<fieldname> ...]\n");
                 break;
             case "IMD":
-                System.out.println("IMD <Input_File>\n");
+                System.out.println("Import Database: IMD <Input_File>\n");
                 break;
             case "EXD":
-                System.out.println("EXD <Output_File>\n");
+                System.out.println("Export Database: EXD <Output_File>\n");
                 break;
             case "HLP":
-                System.out.println("HLP [<command name>]\n"); 
+                System.out.println("Help: HLP [<command name>]\n"); 
                 break;
             case default: 
                 System.out.println("Command not found.\n");
         }
     }
+
 
 //     private boolean authorizeForChangePassword(){
 ////         System.console().printf("Current Password?\n");
