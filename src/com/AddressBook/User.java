@@ -11,7 +11,7 @@ import com.AddressBook.UserEntry.*;
 
 public class User {
 
-    private static User instance;
+    private static User instance = null;
 
     private UserEntry entry;
     private String DBKey;
@@ -24,6 +24,8 @@ public class User {
 
 
     public static User getInstance() {
+        if(instance == null)
+            return new User();    
         return instance;
     }
 

@@ -122,10 +122,10 @@
          Map<String, AddressEntry> m = new HashMap<>(lines.length);
          for (String line : lines) {
              AddressEntry ae = new AddressEntry(line);
-             if (m.containsKey(ae.recordId)) {
+             if (m.containsKey(ae.recordID)) {
                  throw new IOException("Duplicate Records when loading Address Database!");
              }
-             m.put(ae.recordId, ae);
+             m.put(ae.recordID, ae);
          }
          return m;
      }
@@ -136,7 +136,8 @@
       * @param m         the map of data to store in the file
       * @throws IOException if fails to write
       */
-     private void setFileFromMap(String userId, @NotNull Encrypter encrypter, @NotNull Map<String, AddressEntry> m) throws IOException, GeneralSecurityException {
+     private void setFileFromMap(String userId, @NotNull Encrypter encrypter, @NotNull Map<String, AddressEntry> m)
+             throws IOException, GeneralSecurityException {
          StringBuilder sb = new StringBuilder();
          m.forEach((k, v) -> {
              sb.append(v.toString()).append("\n");
@@ -150,7 +151,8 @@
       * @param decrypter function to decrypt the data
       * @throws IOException if fails to read db file
       */
-     private void instantiateMapIfNeeded(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+     private void instantiateMapIfNeeded(String userId, Decrypter decrypter)
+             throws IOException, GeneralSecurityException {
          if (map == null || currentUserId == null || !currentUserId.equals(userId)) {
              map = getMapFromFile(userId, decrypter);
              currentUserId = userId;
@@ -166,7 +168,8 @@
       * @return the record with the passed id
       * @throws IOException if database fails to load from file
       */
-     public @Nullable AddressEntry get(String userId, String recordId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+     public @Nullable AddressEntry get(String userId, String recordId, Decrypter decrypter)
+             throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          return map.get(recordId);
      }
@@ -179,7 +182,8 @@
       * @throws IOException              on failure to load or store database file
       * @throws GeneralSecurityException if encryption fails
       */
-     public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter) throws IOException, GeneralSecurityException {
+     public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter)
+             throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          if (!map.containsKey(recordId)) {
              throw new IOException("Record Not Found");
@@ -198,10 +202,11 @@
       * @param encrypter function to encrypt records
       * @throws IOException if database fails to load from file or save to file
       */
-     public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter) throws IOException, GeneralSecurityException {
+     public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter)
+             throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
-         if (!isFull(userId, decrypter) || map.containsKey(entry.recordId)) {
-             map.put(entry.recordId, entry);
+         if (!isFull(userId, decrypter) || map.containsKey(entry.recordID)) {
+             map.put(entry.recordID, entry);
              setFileFromMap(userId, encrypter, map);
          } else {
              throw new IOException("Number of records exceeds maximum");

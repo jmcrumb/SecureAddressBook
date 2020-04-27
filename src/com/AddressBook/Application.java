@@ -34,6 +34,8 @@ public class Application {
             } catch(IllegalAccessError ae) {
                 ui.sendResponse("The current user is not authorized");
             } catch(Exception e) {
+                //TODO: Delete NEXT LINE once debugging is over
+                e.printStackTrace();
                 ui.sendResponse("An unknown error has occurred");
             }
         }
@@ -45,13 +47,17 @@ public class Application {
      * 
      * @param ui User Interface instance to interact with the user
      * @throws IllegalAccessError if an unauthorized access attempt occurs
+     * @return String result of Command execution
      */
     private static String processInput(UserInterface ui) throws IllegalAccessError, Exception {
-        Command command = ui.getNextCommand();                         
+        Command command = ui.getNextCommand();
+        if(command == null)
+            return "Could not find command. Please try again or type 'HLP' for a list of commands\n";                       
         boolean isAuthorized = Authorization.verify(command);
-        AuditLog.getInstance().logCommand(command, isAuthorized);
+        //TODO: Comment in once implemented
+  //      AuditLog.getInstance().logCommand(command, isAuthorized);
         if(isAuthorized)
-            command.execute();
+            return command.execute();
         else
             throw new IllegalAccessError();      
     }
