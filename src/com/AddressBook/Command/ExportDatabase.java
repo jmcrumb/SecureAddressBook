@@ -57,7 +57,6 @@
          if (input.equals("")) {
              throw new CommandException("No Output_file specified");
          }
-
          try {
              Path p = Paths.get(input);
              if (Files.exists(p)) {
@@ -75,7 +74,7 @@
 
 
      @Override
-     String execute() throws CommandException {
+     public String execute() throws CommandException {
          final User user = User.getInstance();
          verifyUser(user);
          Path p = checkInput();

@@ -29,7 +29,7 @@
       * this interface is used to provide a lambda to encrypt a string when calling {@link #set}
       */
      public interface Encrypter {
-         String encrypt(String plainText) throws GeneralSecurityException;
+         String encrypt(String plainText) throws GeneralSecurityException, UnsupportedEncodingException;
      }
 
      /**
@@ -166,7 +166,7 @@
       * @return the record with the passed id
       * @throws IOException if database fails to load from file
       */
-     public AddressEntry get(String userId, String recordId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+     public @Nullable AddressEntry get(String userId, String recordId, Decrypter decrypter) throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          return map.get(recordId);
      }
@@ -260,7 +260,7 @@
          @NotNull Map<String, AddressEntry> m = getMapFromString(data);
          for (Map.Entry<String, AddressEntry> entry : m.entrySet()) {
              if (map.containsKey(entry.getKey())) {
-                 throw new IOException("Duplicate Entries in import!");
+                 throw new IOException("Duplicate recordID");
              } else {
                  map.put(entry.getKey(), entry.getValue());
              }
