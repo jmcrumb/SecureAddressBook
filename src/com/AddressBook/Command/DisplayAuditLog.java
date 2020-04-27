@@ -6,5 +6,14 @@
   * */
  package com.AddressBook.Command;
 
- public class DisplayAuditLog {
+ public class DisplayAuditLog extends Command {
+
+     public DisplayAuditLog(String input) {
+         super(input, 1, "", "");
+     }
+
+     @Override
+     public String execute() {
+         return "TEST LOG";
+     }
  }
