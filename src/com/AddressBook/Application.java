@@ -9,12 +9,9 @@
 package com.AddressBook;
 
 import java.io.IOException;
-import java.util.Scanner;
 
-import com.AddressBook.User;
 import com.AddressBook.Command.Command;
 import com.AddressBook.Command.CommandException;
-import com.AddressBook.Authorization;
 
 public class Application {
   
@@ -54,8 +51,7 @@ public class Application {
         if(command == null)
             return "Could not find command. Please try again or type 'HLP' for a list of commands\n";                       
         boolean isAuthorized = Authorization.verify(command);
-        //TODO: Comment in once implemented
-  //      AuditLog.getInstance().logCommand(command, isAuthorized);
+        AuditLog.getInstance().logCommand(command, isAuthorized);
         if(isAuthorized)
             return command.execute();
         else
