@@ -11,8 +11,6 @@
 
 import com.AddressBook.Database.UserDatabase;
 
-import sun.security.krb5.EncryptedData;
-
  public class AuditLog {
 
     private static AuditLog logInstance;
