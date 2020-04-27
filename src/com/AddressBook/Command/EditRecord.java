@@ -63,7 +63,7 @@ public class EditRecord extends AddRecord{
     }
     
     @Override
-    protected void parseInput() throws CommandException {
+    protected void parseInput() throws CommandException, IOException {
         Scanner scanner = new Scanner(input);
         parseID(scanner.next());
         readInAddressEntry();
@@ -78,9 +78,10 @@ public class EditRecord extends AddRecord{
      * edited.
      */
     private void readInAddressEntry() {
+        User usr = User.getInstance();
         AddressEntry ae = 
-            AddressDatabase.getInstance().get(User.getInstance().getUserID(), recordID, 
-                                                (String s) -> Encryption.decrypt(s));     
+            AddressDatabase.getInstance().get(usr.getUserId(), recordID, 
+                                                usr::decrypt);     
         SN = ae.SN;
         GN = ae.GN;
         PEM = ae.PEM;

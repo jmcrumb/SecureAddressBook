@@ -70,8 +70,8 @@ public class DeleteRecord extends Command{
     }
 
     private void delete() throws CommandException, IOException {
-        AddressDatabase.getInstance().delete(User.getInstance().getUserId(), recordID,
-                                            (String s) -> Encryption.decrypt(s),
-                                            (String s) -> Encryption.encrypt(s));
+        User usr = User.getInstance();
+        AddressDatabase.getInstance().delete(usr.getUserId(), recordID,
+                                            usr::decrypt, usr::encrypt);
     }
  }

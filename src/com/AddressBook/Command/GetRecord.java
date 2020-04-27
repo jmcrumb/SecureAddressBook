@@ -60,9 +60,10 @@ public class GetRecord extends Command{
         String recordID = scanner.next();
         if(!validateInput(recordID))
             throw new CommandException("Invalid recordID");
+        User usr = User.getInstance();
         AddressEntry ae = 
-            AddressDatabase.getInstance().get(User.getInstance().getUserId(), 
-                                              recordID, (String s) -> Encryption.decrypt(s, s));
+            AddressDatabase.getInstance().get(usr.getUserId(), 
+                                              recordID, usr::decrypt);
         
         String queryResult = parseFields(scanner, ae);
         return "OK\n" + queryResult;
