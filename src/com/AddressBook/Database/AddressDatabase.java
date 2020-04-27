@@ -149,7 +149,8 @@
       * @param decrypter function to decrypt the data
       * @throws IOException if fails to read db file
       */
-     private void instantiateMapIfNeeded(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+     private void instantiateMapIfNeeded(String userId, Decrypter decrypter)
+             throws IOException, GeneralSecurityException {
          if (map == null || currentUserId == null || !currentUserId.equals(userId)) {
              map = getMapFromFile(userId, decrypter);
              currentUserId = userId;
@@ -165,7 +166,9 @@
       * @return the record with the passed id
       * @throws IOException if database fails to load from file
       */
+
      public  AddressEntry get(String userId, String recordId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+
          instantiateMapIfNeeded(userId, decrypter);
          return map.get(recordId);
      }
@@ -178,7 +181,8 @@
       * @throws IOException              on failure to load or store database file
       * @throws GeneralSecurityException if encryption fails
       */
-     public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter) throws IOException, GeneralSecurityException {
+     public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter)
+             throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          if (!map.containsKey(recordId)) {
              throw new IOException("Record Not Found");
@@ -197,7 +201,8 @@
       * @param encrypter function to encrypt records
       * @throws IOException if database fails to load from file or save to file
       */
-     public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter) throws IOException, GeneralSecurityException {
+     public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter)
+             throws IOException, GeneralSecurityException {
          instantiateMapIfNeeded(userId, decrypter);
          if (!isFull(userId, decrypter) || map.containsKey(entry.recordID)) {
              map.put(entry.recordID, entry);
