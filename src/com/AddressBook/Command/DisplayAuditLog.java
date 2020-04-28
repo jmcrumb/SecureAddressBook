@@ -9,7 +9,7 @@
  public class DisplayAuditLog extends Command {
 
      public DisplayAuditLog(String input) {
-         super(input, 1, "", "");
+         super(input, 2, "", "");
      }
 
      @Override
