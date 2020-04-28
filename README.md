@@ -5,12 +5,12 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 
 
 ### To Debug
-- AddRecord.java
+- AddRecord.java  (needs to handle setting record values)
 - ChangePassword.java
 - DeleteRecord.java
 - DeleteUser.java
 - DisplayAuditLog.java
-- EditRecord.java
+- EditRecord.java (shouldn't rely on parseArg() from AddRecord.java)
 - ExportDatabase.java
 - GetRecord.java
 - ImportDatabase.java
