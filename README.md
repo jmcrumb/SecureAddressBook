@@ -9,9 +9,7 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 - DeleteRecord.java (user isn't authorized for this command)
 - DisplayAuditLog.java (admin isn't authorized for this command)
 - EditRecord.java (shouldn't rely on parseArg() from AddRecord.java)
-- ExportDatabase.java
 - GetRecord.java (Now causes a Üser Databse Failed to Write!" after two ADR commands)
-- ImportDatabase.java
 
 
 ### Bug-Free
@@ -24,3 +22,5 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 - AddUser.java
 - ChangePassword.java
 - DeleteUser.java
+- ImportDatabase.java
+- ExportDatabase.java
