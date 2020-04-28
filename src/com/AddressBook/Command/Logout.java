@@ -6,5 +6,23 @@
   * */
  package com.AddressBook.Command;
 
- public class Logout {
+ import com.AddressBook.User;
+
+ public class Logout extends Command {
+     /**
+      * Creates a Logout object
+      */
+     public Logout() {
+         super(null, 0, "LO", "LO");
+     }
+
+     @Override
+     public String execute() throws CommandException {
+         if (User.getInstance().getAuthorization() < authRequirement) {
+             throw new CommandException("No active login session");
+         } else {
+             User.getInstance().setUser(null, null);
+             return "OK";
+         }
+     }
  }

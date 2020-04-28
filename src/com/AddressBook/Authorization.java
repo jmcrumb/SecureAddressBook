@@ -1,12 +1,12 @@
- /*
-  * Title:          com.AddressBook
-  * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
-  * Last Modified:  4/22/20
-  * Description:
-  * */
- package com.AddressBook;
+/*
+ * Title:          com.AddressBook
+ * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
+ * Last Modified:  4/22/20
+ * Description:
+ * */
+package com.AddressBook;
 
- import com.AddressBook.User;
+import com.AddressBook.Command.Command;
 
  public class Authorization {
      
@@ -19,6 +19,8 @@
      * is successful
      */
     public static boolean verify(Command command) {
+        if(command.authRequirement == 0)
+            return true;
         return User.getInstance().getAuthorization() == command.authRequirement;
     }
  }

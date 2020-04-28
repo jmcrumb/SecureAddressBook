@@ -7,23 +7,24 @@
  package com.AddressBook.Database;
 
  import com.AddressBook.UserEntry.UserEntry;
- import org.jetbrains.annotations.NotNull;
- import org.jetbrains.annotations.Nullable;
 
  import java.io.IOException;
  import java.nio.file.Files;
  import java.nio.file.Path;
  import java.nio.file.Paths;
- import java.util.*;
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
 
  import static java.nio.charset.StandardCharsets.US_ASCII;
- import static java.nio.file.StandardOpenOption.*;
+ import static java.nio.file.StandardOpenOption.CREATE;
+ import static java.nio.file.StandardOpenOption.WRITE;
 
  /**
   * Singleton Object to hold the user database
   */
- public class UserDatabase{
-     //  getInstance
+ public class UserDatabase {
      /**
       * the maximum # of accounts that can be created including admin
       */
@@ -38,13 +39,13 @@
       */
      private Map<String, UserEntry> map;
 
-     private @NotNull List<String> mapToList(Map<String, UserEntry> m) {
+     private List<String> mapToList(Map<String, UserEntry> m) {
          ArrayList<String> a = new ArrayList<>(m.size());
          m.forEach((ignored, v) -> a.add(v.toString()));
          return a;
      }
 
-     private @NotNull Map<String, UserEntry> mapFromList(List<String> l) {
+     private Map<String, UserEntry> mapFromList(List<String> l) {
          Map<String, UserEntry> m = new HashMap<>();
          l.forEach(s -> {
              UserEntry u = new UserEntry(s);
@@ -55,6 +56,7 @@
 
      /**
       * used to write data to the Database file {@value #FILE_NAME}
+      *
       * @param toWrite the data to write
       * @throws IOException when something goes wrong
       */
@@ -84,10 +86,11 @@
 
      /**
       * reads database file {@value FILE_NAME}
+      *
       * @return List of lines from a file or null if file doesn't exist
       * @throws IOException if something goes wrong reading file
       */
-     private @Nullable List<String> readFile() throws IOException {
+     private List<String> readFile() throws IOException {
          Path path = Paths.get(FILE_NAME);
          if (!Files.exists(path)) {
              return null;
@@ -107,9 +110,10 @@
       * @throws IOException              from {@link #readFile()}
       */
      private void getDbFromFile() throws IOException {
-         @Nullable List<String> l = readFile();
+         List<String> l = readFile();
          if (l == null) {
              map = new HashMap<>();
+             map.put("admin", new UserEntry("admin", null));
          } else {
              // check to make sure hasn't been modified to be oversized
              if (l.size() > MAX_ACCOUNTS) {
@@ -122,6 +126,7 @@
 
      /**
       * saves {@link #map} to file named {@value FILE_NAME}
+      *
       * @throws IOException because it calls {@link #writeFile}
       */
      private void updateDbFile() throws IOException {
@@ -129,7 +134,6 @@
      }
 
      /**
-      *
       * @throws IOException because it calls {@link #getDbFromFile} to load the database
       */
      private UserDatabase() throws IOException {
@@ -139,6 +143,7 @@
 
      /**
       * Used to get the one instance of the singleton UserDatabase
+      *
       * @return The user database
       * @throws IOException if fails to load Database file {@value FILE_NAME}
       */
@@ -150,7 +155,6 @@
      }
 
      /**
-      *
       * @param userId the user to check for
       * @return If a user is in the database
       */
@@ -162,30 +166,45 @@
       * @return if the database is full
       */
      public boolean isFull() {
-         return (map.size() < MAX_ACCOUNTS);
+         return !(map.size() < MAX_ACCOUNTS);
+     }
+
+     /**
+      * @param userId User to delete
+      * @throws IOException if fails to find account
+      */
+     public void deleteUser(String userId) throws IOException {
+         if (exists(userId)) {
+             map.remove(userId);
+             updateDbFile();
+         } else {
+             throw new IOException("Account doesn't exist");
+         }
      }
 
      /**
       * Get an entry from the database
+      *
       * @param userId the id of the entry to retrieve
       * @return an entry or null if user doesn't exist
       */
-     public @Nullable UserEntry get(String userId) {
+     public UserEntry get(String userId) {
          return map.get(userId);
      }
 
      /**
       * Save an entry in the database
+      *
       * @param entry the entry to be saved in the database
       * @throws IOException if at #{@value MAX_ACCOUNTS} accounts
       */
      public void set(UserEntry entry) throws IOException {
          // if the max # of accounts isn't reached or just updating account that exists
-         if (map.size() < MAX_ACCOUNTS || exists(entry.userId)) {
+         if (!isFull() || exists(entry.userId)) {
              map.put(entry.userId, entry);
              updateDbFile();
          } else {
-             throw new IllegalArgumentException("Already at max accounts!" +
+             throw new IOException("Already at max accounts!" +
                " delete one before adding a new one");
          }
      }

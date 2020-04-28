@@ -8,12 +8,26 @@
  package com.AddressBook.Command;
 
  public abstract class Command {
+  
+     protected static final int CODE_NONE = 0;
+     protected static final int CODE_USER = 1;
+     protected static final int CODE_ADMIN = 2;
+
+  
      public final int authRequirement;
      protected String input;
-     protected String authorizedCode;
-     protected String unauthorizedCode;
 
-     private final int maxPriviledge = 2;
+     public String getAuthorizedCode() {
+         return authorizedCode;
+     }
+
+     protected String authorizedCode;
+
+     public String getUnauthorizedCode() {
+         return unauthorizedCode;
+     }
+
+     protected String unauthorizedCode;
 
      /**
       * Creates a Command object
@@ -46,12 +60,44 @@
      }
 
      /**
+     * Helper method for validating input conforms with requirements 
+     * outlined in design document:
+     * i) Is no larger than the Maximum size of input for an input 
+     * ii) Is alphanumeric
+     * iii) Is nonempty
+     * 
+     * @param input Input to be validated
+     * @param maxSize maximum size of input
+     * @return if the input is valid
+     */
+    protected boolean validateInput(String input, int maxSize) {
+        if(input == null || input.length() > maxSize)
+            return false;
+        return input.matches("^[a-zA-Z0-9]+$");
+    }
+
+    /**
+     * Helper method for validating input conforms with requirements 
+     * outlined in design document:
+     * i) Is alphanumeric
+     * ii) Is nonempty
+     * 
+     * @param input Input to be validated
+     * @return if the input is valid
+     */
+    protected boolean validateInput(String input) {
+        if(input == null)
+            return false;
+        return input.matches("^[a-zA-Z0-9]+$");
+    }
+
+     /**
       * Executes command represented by this object.  This class is abstract and thus 
       * must be overloaded in all subclass implementations of this class.
       *
       * @return String to be determined by implementation
       * @throws CommandException
       */
-      abstract String execute() throws CommandException;
+      abstract public String execute() throws Exception;
 
  }
