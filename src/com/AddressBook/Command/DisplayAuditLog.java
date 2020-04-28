@@ -8,27 +8,26 @@
  import java.nio.file.Files;
  import java.nio.file.Paths;
 
- public class DisplayAuditLog extends Command{
+ import java.io.IOException;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+ import java.nio.file.Paths;
+ import java.util.List;
 
-    String DislayAuditLog(){
-        Super(null,2,"DAL",null);
-    }
+ public class DisplayAuditLog extends Command {
 
-    @Override
-    public void execute() throws CommandException {
-        Path path = Paths.get("logHistory.txt");
-        try{
-            List contents = Files.readAllLines(path);
+     public DisplayAuditLog(String input) {
+         super(null, 2, "DAL", null);
+     }
 
-            //Read from the stream
-            for(String content:contents){//for each line of content in contents
-                String[] contentArray = content.split(";");
-                //displays the userID and whether command is authorized
-                System.out.println(contentArray[0] + " " + contentArray[1]); 
-            }
-        }
-        catch(IOException ex){
-            ex.printStackTrace();//handle exception here
-        }
-    }
+     @Override
+     public String execute() throws CommandException {
+         Path path = Paths.get("logHistory.txt");
+         try {
+             List<String> contents = Files.readAllLines(path);
+             return String.join("\n", contents);
+         } catch (IOException ex) {
+             throw new CommandException("Failed to open AuditLog");
+         }
+     }
  }

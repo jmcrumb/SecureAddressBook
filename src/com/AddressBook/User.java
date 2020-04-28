@@ -6,7 +6,6 @@
  * */
 package com.AddressBook;
 
-import com.AddressBook.Command.CommandException;
 import com.AddressBook.UserEntry.*;
 
 public class User {

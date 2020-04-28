@@ -19,7 +19,6 @@ package com.AddressBook.Command;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import com.AddressBook.Encryption;
 import com.AddressBook.User;
 import com.AddressBook.Database.AddressDatabase;
 
