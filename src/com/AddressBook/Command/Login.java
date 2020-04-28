@@ -9,6 +9,7 @@ package com.AddressBook.Command;
 import com.AddressBook.Database.UserDatabase;
 import com.AddressBook.Encryption;
 import com.AddressBook.User;
+import com.AddressBook.UserEntry.AdminEntry;
 import com.AddressBook.UserEntry.UserEntry;
 import com.AddressBook.UserInput;
 
@@ -20,7 +21,7 @@ import java.util.Set;
 public class Login extends Command {
 
     public Login(String input) {
-        super(input, 0, "LS", "LF");
+        super((input == null) ? "" : input, 0, "LS", "LF");
     }
 
 
@@ -38,11 +39,14 @@ public class Login extends Command {
         }
 
         String[] splitInput = input.split(" ");
-        if (splitInput.length < 2) {
+        if (input.equals("")) {
             throw new CommandException("A username and password must be provided.");
         }
         String userid = splitInput[0];
-        String password = Encryption.hashBCrypt(splitInput[1]);
+        String password = "";
+        if (splitInput.length > 1) {
+            password = splitInput[1];
+        }
 
         UserDatabase database = UserDatabase.getInstance();
 
@@ -75,13 +79,25 @@ public class Login extends Command {
             } else {
                 return "Passwords do not match";
             }
-            database.set(new UserEntry(userid, newPassword));
-        } else if (!entry.passwordHash.equals(password)) {
+            entry = new UserEntry(userid, Encryption.hashBCrypt(newPassword));
+            database.set(entry);
+            if (entry.userId.equals("admin")) entry = new AdminEntry(entry);
+            try {
+                User.getInstance().setUser(entry, Encryption.hashSHA256(password));
+            } catch (Exception e) {
+                throw new CommandException("Unknown Error.");
+            }
+        } else if (!Encryption.checkBCrypt(password, entry.passwordHash)) {
             // case 3 (invalid password)
             return "Invalid Credentials";
         } else {
             // case 4 (correct username and password)
-            User.getInstance().setUser(entry, password);
+            if (entry.userId.equals("admin")) entry = new AdminEntry(entry);
+            try {
+                User.getInstance().setUser(entry, Encryption.hashSHA256(password));
+            } catch (Exception e) {
+                throw new CommandException("Unknown Error.");
+            }
         }
 
         return "OK";

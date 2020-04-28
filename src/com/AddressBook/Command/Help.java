@@ -3,7 +3,7 @@ package com.AddressBook.Command;
 public class Help extends Command{
 
     public Help(String input) {
-        super(input, 3, null, null);
+        super(input, 0, null, null);
     }
 
     @Override

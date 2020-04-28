@@ -8,7 +8,6 @@ package com.AddressBook.Command;
 
 import java.io.IOException;
 
-import com.AddressBook.User;
 import com.AddressBook.Database.UserDatabase;
 import com.AddressBook.UserEntry.UserEntry;
 
@@ -41,7 +40,7 @@ import com.AddressBook.UserEntry.UserEntry;
             throw new CommandException("Account already exists");
         else {
             //Creates a new user associated with the userID
-            UserDatabase.getInstance().set(new UserEntry(userID));
+            UserDatabase.getInstance().set(new UserEntry(userID, null));
             return "OK";
         }
     }

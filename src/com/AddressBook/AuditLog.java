@@ -19,7 +19,8 @@
  public class AuditLog {
 
     private static AuditLog logInstance;
-    File logHistory;
+
+    private AuditLog() { }
 
     public static AuditLog getInstance(){
         if(logInstance == null){
@@ -35,9 +36,6 @@
         try {
             if (command == null) {
                 return;
-            }
-            if (!logHistory.exists()) {
-                logHistory = new File("logHistory.txt");
             }
 
 

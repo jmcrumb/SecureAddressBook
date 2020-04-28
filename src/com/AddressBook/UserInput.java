@@ -14,6 +14,7 @@ public class UserInput {
 
 
     public static UserInput getInstance() {
+        if (instance == null) instance = new UserInput();
         return instance;
     }
 
@@ -23,7 +24,7 @@ public class UserInput {
     }
 
     public void sendOutput(String output) {
-        cnsl.writer().print(output);
+        cnsl.printf(output);
     }
 
 }

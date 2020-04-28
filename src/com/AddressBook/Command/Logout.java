@@ -13,7 +13,7 @@
       * Creates a Logout object
       */
      public Logout() {
-         super(null, 1, "LO", "LO");
+         super(null, 0, "LO", "LO");
      }
 
      @Override
