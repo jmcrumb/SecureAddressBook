@@ -11,7 +11,7 @@ import com.AddressBook.Database.AddressDatabase;
 import org.mindrot.BCrypt;
 
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -43,28 +44,32 @@ public class Encryption {
         return BCrypt.checkpw(unhashed, hashed);
     }
 
-    public static byte[] encrypt(String data, String key) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
+    public static String encrypt(String data, String key) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
         byte[] encodeKey = Base64.getDecoder().decode(key.getBytes("UTF-8"));
         encodeKey = Arrays.copyOf(encodeKey, 16);
         SecretKeySpec aesKey = new SecretKeySpec(encodeKey, "AES");
 
         Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        aes.init(Cipher.ENCRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
+        System.out.println("en before: " + data);
+        aes.init(Cipher.ENCRYPT_MODE, aesKey);
         byte[] cipherText = aes.doFinal(data.getBytes("UTF-8"));
+        System.out.println("en after: " + Base64.getEncoder().encodeToString(cipherText));
 
-        return cipherText;
+        return Base64.getEncoder().encodeToString(cipherText);
     }
 
-    public static String decrypt(byte[] data, String key) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
+    public static String decrypt(String data, String key) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
         byte[] decodeKey = Base64.getDecoder().decode(key.getBytes("UTF-8"));
         decodeKey = Arrays.copyOf(decodeKey, 16);
         SecretKeySpec aesKey = new SecretKeySpec(decodeKey, "AES");
 
         Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        aes.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
-        byte[] plainText = aes.doFinal(data);
+        System.out.println("before: " + data);
+        aes.init(Cipher.DECRYPT_MODE, aesKey);
+        byte[] plainText = aes.doFinal(data.getBytes("UTF-8"));
+        System.out.println("after: " + new String(plainText, "UTF-8"));
 
         return new String(plainText, "UTF-8");
     }
