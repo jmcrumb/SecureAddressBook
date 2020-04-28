@@ -11,7 +11,6 @@ import com.AddressBook.Database.AddressDatabase;
 import org.mindrot.BCrypt;
 
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
@@ -52,8 +51,10 @@ public class Encryption {
 
         Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        aes.init(Cipher.ENCRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
+        System.out.println("en before: " + data);
+        aes.init(Cipher.ENCRYPT_MODE, aesKey);
         byte[] cipherText = aes.doFinal(data.getBytes("UTF-8"));
+        System.out.println("en after: " + Base64.getEncoder().encodeToString(cipherText));
 
         return Base64.getEncoder().encodeToString(cipherText);
     }
@@ -65,8 +66,10 @@ public class Encryption {
 
         Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        aes.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
-        byte[] plainText = aes.doFinal(Base64.getDecoder().decode(data));
+        System.out.println("before: " + data);
+        aes.init(Cipher.DECRYPT_MODE, aesKey);
+        byte[] plainText = aes.doFinal(data.getBytes("UTF-8"));
+        System.out.println("after: " + new String(plainText, "UTF-8"));
 
         return new String(plainText, "UTF-8");
     }
