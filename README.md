@@ -7,7 +7,7 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 ### To Debug
 - AddRecord.java  (needs to handle setting record values)
 - DeleteRecord.java (user isn't authorized for this command)
-- DisplayAuditLog.java
+- DisplayAuditLog.java (admin isn't authorized for this command)
 - EditRecord.java (shouldn't rely on parseArg() from AddRecord.java)
 - ExportDatabase.java
 - GetRecord.java
