@@ -10,7 +10,7 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 - DisplayAuditLog.java (admin isn't authorized for this command)
 - EditRecord.java (shouldn't rely on parseArg() from AddRecord.java)
 - ExportDatabase.java
-- GetRecord.java
+- GetRecord.java (causes a BadPaddingException (Kanan is working on it))
 - ImportDatabase.java
 
 
