@@ -85,10 +85,12 @@ public class AddressDatabase {
     private void writeFile(String userId, byte[] data) throws IOException {
         Path path = Paths.get(FOLDER_NAME, FILE_PREFIX + userId);
         try {
-            Files.createDirectory(Paths.get(FOLDER_NAME));
+            if(Files.notExists(Paths.get(FOLDER_NAME)))
+                Files.createDirectory(Paths.get(FOLDER_NAME));
             Files.write(path, data);
             // Files.writeString(path, data, UTF_8, CREATE, WRITE);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new IOException("User Database Failed to Write!");
         }
     }

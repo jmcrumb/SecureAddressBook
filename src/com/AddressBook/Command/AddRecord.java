@@ -85,7 +85,7 @@
       */
      protected void parseInput() throws CommandException, IOException, GeneralSecurityException {
          Scanner scanner = new Scanner(input);
-         parseID(scanner.next());
+         parseID(scanner.next(), true);
          while (scanner.hasNext()) {
              parseArg(scanner.next());
          }
@@ -96,18 +96,19 @@
       * Validates and parses the record ID.
       *
       * @param arg record ID field
+      * @param checkDuplicate if the method should check for preexisting record
       * @throws CommandException if field does not match expectations for the record
       *                          ID
       * @throws IOException      if there is an issue interacting with the database
       */
-     protected void parseID(String arg) throws CommandException, IOException, GeneralSecurityException {
-         if (!validateInput(input, MAX_RECORD_FIELD_SIZE))
+     protected void parseID(String arg, boolean checkDuplicate) throws CommandException, IOException, GeneralSecurityException {
+         if (!validateInput(arg, MAX_RECORD_FIELD_SIZE))
              throw new CommandException("Invalid recordID");
          recordID = arg.trim();
          User usr = User.getInstance();
          AddressEntry ae = AddressDatabase.getInstance().get(usr.getUserId(),
            recordID, usr::decrypt);
-         if (ae != null)
+         if (checkDuplicate && ae != null)
              throw new CommandException("Duplicate recordID");
      }
 
@@ -172,4 +173,22 @@
          User usr = User.getInstance();
          AddressDatabase.getInstance().set(User.getInstance().getUserId(), ae, usr::decrypt, usr::encrypt);
      }
+
+     /**
+     * Helper method for validating input conforms with requirements 
+     * outlined in design document:
+     * i) Is no larger than the Maximum size of input for an input 
+     * ii) Is alphanumeric
+     * iii) Is nonempty
+     * 
+     * @param input Input to be validated
+     * @param maxSize maximum size of input
+     * @return if the input is valid
+     */
+    @Override
+    protected boolean validateInput(String input, int maxSize) {
+        if(input == null || input.length() > maxSize)
+            return false;
+        return input.matches("^[a-z<-Z!-:^-z]+$");
+    }
  }

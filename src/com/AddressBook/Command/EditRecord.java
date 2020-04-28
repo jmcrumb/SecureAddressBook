@@ -23,11 +23,9 @@ import java.security.GeneralSecurityException;
 import java.util.Scanner;
 
 import com.AddressBook.Command.AddRecord;
-import com.AddressBook.Command.CommandException;
 import com.AddressBook.AddressEntry;
 import com.AddressBook.Database.AddressDatabase;
 import com.AddressBook.User;
-import com.AddressBook.Encryption;
 
 public class EditRecord extends AddRecord {
 
@@ -66,7 +64,7 @@ public class EditRecord extends AddRecord {
     @Override
     protected void parseInput() throws CommandException, IOException, GeneralSecurityException {
         Scanner scanner = new Scanner(input);
-        parseID(scanner.next());
+        parseID(scanner.next(), false);
         readInAddressEntry();
         while (scanner.hasNext()) {
             parseArg(scanner.next());
