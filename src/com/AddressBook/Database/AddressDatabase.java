@@ -77,6 +77,10 @@ public class AddressDatabase {
         }
     }
 
+    private void deleteFile(String userId) throws IOException {
+        Files.delete(Paths.get(FOLDER_NAME, FILE_PREFIX + userId));
+    }
+
     /**
      * @param userId the user of the file to write
      * @param data   the encrypted data to write to the file
@@ -102,7 +106,7 @@ public class AddressDatabase {
      * @throws IOException if fails to read file or misformatted
      */
     private Map<String, AddressEntry> getMapFromFile(String userId, Decrypter decrypter)
-            throws IOException, GeneralSecurityException {
+      throws IOException, GeneralSecurityException {
         byte[] encypted = readFile(userId);
         if (encypted == null) {
             return new HashMap<>();
@@ -140,12 +144,11 @@ public class AddressDatabase {
      * @throws IOException if fails to write
      */
     private void setFileFromMap(String userId, Encrypter encrypter, Map<String, AddressEntry> m)
-            throws IOException, GeneralSecurityException {
+      throws IOException, GeneralSecurityException {
         StringBuilder sb = new StringBuilder();
         m.forEach((k, v) -> {
             sb.append(v.toString()).append("\n");
         });
-        sb.deleteCharAt(sb.lastIndexOf("\n"));
         writeFile(userId, encrypter.encrypt(sb.toString()));
     }
 
@@ -155,7 +158,7 @@ public class AddressDatabase {
      * @throws IOException if fails to read db file
      */
     private void instantiateMapIfNeeded(String userId, Decrypter decrypter)
-            throws IOException, GeneralSecurityException {
+      throws IOException, GeneralSecurityException {
         if (map == null || currentUserId == null || !currentUserId.equals(userId)) {
             map = getMapFromFile(userId, decrypter);
             currentUserId = userId;
@@ -173,7 +176,7 @@ public class AddressDatabase {
      */
 
     public AddressEntry get(String userId, String recordId, Decrypter decrypter)
-            throws IOException, GeneralSecurityException {
+      throws IOException, GeneralSecurityException {
 
         instantiateMapIfNeeded(userId, decrypter);
         return map.get(recordId);
@@ -188,13 +191,17 @@ public class AddressDatabase {
      * @throws GeneralSecurityException if encryption fails
      */
     public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter)
-            throws IOException, GeneralSecurityException {
+      throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         if (!map.containsKey(recordId)) {
             throw new IOException("Record Not Found");
         } else {
             map.remove(recordId);
-            setFileFromMap(userId, encrypter, map);
+            if (map.size() == 0) {
+                deleteFile(userId);
+            } else {
+                setFileFromMap(userId, encrypter, map);
+            }
         }
     }
 
@@ -208,7 +215,7 @@ public class AddressDatabase {
      * @throws IOException if database fails to load from file or save to file
      */
     public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter)
-            throws IOException, GeneralSecurityException {
+      throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         if (!isFull(userId, decrypter) || map.containsKey(entry.recordID)) {
             map.put(entry.recordID, entry);
@@ -266,7 +273,7 @@ public class AddressDatabase {
      * @throws IOException if fails to read or write db file
      */
     public void importDB(String userId, Decrypter decrypter, Encrypter encrypter, String data)
-            throws IOException, GeneralSecurityException {
+      throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         Map<String, AddressEntry> m = getMapFromString(data);
         for (Map.Entry<String, AddressEntry> entry : m.entrySet()) {
