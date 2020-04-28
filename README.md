@@ -6,8 +6,7 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 
 ### To Debug
 - AddRecord.java  (needs to handle setting record values)
-- ChangePassword.java
-- DeleteRecord.java
+- DeleteRecord.java (user isn't authorized for this command)
 - DeleteUser.java
 - DisplayAuditLog.java
 - EditRecord.java (shouldn't rely on parseArg() from AddRecord.java)
@@ -24,3 +23,4 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 - Command.java
 - CommandException.java
 - AddUser.java
+- ChangePassword.java
