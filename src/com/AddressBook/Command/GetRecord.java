@@ -53,6 +53,7 @@ public class GetRecord extends Command {
      */
     @Override
     public String execute() throws CommandException, IOException, GeneralSecurityException {
+        if (input.trim().equals("")) return "Invalid recordID";
         Scanner scanner = new Scanner(input.trim());
         String recordID = scanner.next();
         if (!validateInput(recordID))
@@ -62,8 +63,16 @@ public class GetRecord extends Command {
           AddressDatabase.getInstance().get(usr.getUserId(),
             recordID, usr::decrypt);
 
+        if (ae == null) {
+            return "RecordID not found";
+        }
         String queryResult = parseFields(scanner, ae);
         return "OK\n" + queryResult;
+    }
+
+    private String hlpme(String s) {
+        if (s == null) return "none";
+        return s;
     }
 
     /**
@@ -75,9 +84,9 @@ public class GetRecord extends Command {
      */
     private String parseFields(Scanner scanner, AddressEntry ae) throws CommandException {
         if (!scanner.hasNext())
-            return String.format("SN,N,PEM,WEM,PPH,WPH,SA,CITY,STP,CTY,PC\n" +
+            return String.format("SN,GN,PEM,WEM,PPH,WPH,SA,CITY,STP,CTY,PC\n" +
                 "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-              ae.SN, ae.GN, ae.PEM, ae.WEM, ae.PPH, ae.WPH, ae.SA, ae.CITY, ae.STP, ae.CTY, ae.PC);
+                hlpme(ae.SN), hlpme(ae.GN), hlpme(ae.PEM), hlpme(ae.WEM), hlpme(ae.PPH), hlpme(ae.WPH), hlpme(ae.SA), hlpme(ae.CITY), hlpme(ae.STP), hlpme(ae.CTY), hlpme(ae.PC));
         StringBuilder queryResult = new StringBuilder();
         StringBuilder fields = new StringBuilder();
         while (scanner.hasNext()) {
@@ -100,37 +109,37 @@ public class GetRecord extends Command {
         String val = "";
         switch (field) {
             case "SN":
-                val = ae.SN;
+                val = hlpme(ae.SN);
                 break;
             case "GN":
-                val = ae.GN;
+                val = hlpme(ae.GN);
                 break;
             case "PEM":
-                val = ae.PEM;
+                val = hlpme(ae.PEM);
                 break;
             case "WEM":
-                val = ae.WEM;
+                val = hlpme(ae.WEM);
                 break;
             case "PPH":
-                val = ae.PPH;
+                val = hlpme(ae.PPH);
                 break;
             case "WPH":
-                val = ae.WPH;
+                val = hlpme(ae.WPH);
                 break;
             case "SA":
-                val = ae.SA;
+                val = hlpme(ae.SA);
                 break;
             case "CITY":
-                val = ae.CITY;
+                val = hlpme(ae.CITY);
                 break;
             case "STP":
-                val = ae.STP;
+                val = hlpme(ae.STP);
                 break;
             case "CTY":
-                val = ae.CTY;
+                val = hlpme(ae.CTY);
                 break;
             case "PC":
-                val = ae.PC;
+                val = hlpme(ae.PC);
                 break;
             default:
                 throw new CommandException("One or more invalid record data fields");

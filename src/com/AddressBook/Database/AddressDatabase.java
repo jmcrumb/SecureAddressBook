@@ -18,7 +18,7 @@
  import java.util.HashMap;
  import java.util.Map;
 
- import static java.nio.charset.StandardCharsets.US_ASCII;
+ import static java.nio.charset.StandardCharsets.UTF_8;
  import static java.nio.file.StandardOpenOption.CREATE;
  import static java.nio.file.StandardOpenOption.WRITE;
 
@@ -71,7 +71,7 @@
              return null;
          } else {
              try {
-                 return Files.readString(path, US_ASCII);
+                 return Files.readString(path, UTF_8);
              } catch (IOException e) {
                  throw new IOException("Database exists and Failed to Read!");
              }
@@ -86,7 +86,8 @@
      private void writeFile(String userId, String data) throws IOException {
          Path path = Paths.get(FOLDER_NAME, FILE_PREFIX + userId);
          try {
-             Files.writeString(path, data, US_ASCII, CREATE, WRITE);
+             Files.createDirectory(Paths.get(FOLDER_NAME));
+             Files.writeString(path, data, UTF_8, CREATE, WRITE);
          } catch (IOException e) {
              throw new IOException("User Database Failed to Write!");
          }

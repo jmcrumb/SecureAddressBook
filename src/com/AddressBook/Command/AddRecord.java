@@ -72,6 +72,7 @@
       */
      @Override
      public String execute() throws CommandException, IOException, GeneralSecurityException {
+         if (input.trim().equals("")) return "No recordID";
          parseInput();
          writeToDatabase();
          return "OK";

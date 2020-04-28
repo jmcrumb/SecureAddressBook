@@ -40,7 +40,7 @@ import com.AddressBook.UserEntry.UserEntry;
             throw new CommandException("Account already exists");
         else {
             //Creates a new user associated with the userID
-            UserDatabase.getInstance().set(new UserEntry(userID));
+            UserDatabase.getInstance().set(new UserEntry(userID, null));
             return "OK";
         }
     }
