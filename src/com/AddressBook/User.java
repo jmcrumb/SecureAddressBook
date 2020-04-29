@@ -24,7 +24,7 @@ public class User {
 
     public static User getInstance() {
         if(instance == null)
-            return new User();    
+            return new User();
         return instance;
     }
 
@@ -41,14 +41,14 @@ public class User {
     }
 
 
-    public String encrypt(String data) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
+    public byte[] encrypt(String data) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
         if (DBKey == null || entry == null) {
             throw new RuntimeException("User is not initialized.");
         }
         return Encryption.encrypt(data, DBKey);
     }
 
-    public String decrypt(String data) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
+    public String decrypt(byte[] data) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
         if (DBKey == null || entry == null) {
             throw new RuntimeException("User is not initialized.");
         }
