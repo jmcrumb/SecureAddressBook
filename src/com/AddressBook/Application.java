@@ -8,10 +8,10 @@
  * */
 package com.AddressBook;
 
-import java.io.IOException;
-
 import com.AddressBook.Command.Command;
 import com.AddressBook.Command.CommandException;
+
+import java.io.IOException;
 
 public class Application {
 
@@ -27,10 +27,12 @@ public class Application {
             try {
                 ui.sendResponse(processInput(ui));
             } catch (CommandException | IOException ce) {
+                //TODO: Delete NEXT LINE once debugging is over
+                System.out.println("***CommandException | IOException***");
                 ui.sendResponse(ce.getMessage());
             } catch (IllegalAccessError ae) {
                 ui.sendResponse("The current user is not authorized");
-            } catch(Exception e) {
+            } catch (Exception e) {
                 //TODO: Delete NEXT LINE once debugging is over
                 e.printStackTrace();
 
@@ -45,16 +47,16 @@ public class Application {
      * executing said command.
      *
      * @param ui User Interface instance to interact with the user
-     * @throws IllegalAccessError if an unauthorized access attempt occurs
      * @return String result of Command execution
+     * @throws IllegalAccessError if an unauthorized access attempt occurs
      */
     private static String processInput(UserInterface ui) throws IllegalAccessError, Exception {
         Command command = ui.getNextCommand();
-        if(command == null)
-            return "Could not find command. Please try again or type 'HLP' for a list of commands\n";                       
+        if (command == null)
+            return "Could not find command. Please try again or type 'HLP' for a list of commands\n";
         boolean isAuthorized = Authorization.verify(command);
         AuditLog.getInstance().logCommand(command, isAuthorized);
-        if(isAuthorized)
+        if (isAuthorized)
             return command.execute();
         else
             throw new IllegalAccessError();
