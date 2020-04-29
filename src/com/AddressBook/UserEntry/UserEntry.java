@@ -28,7 +28,7 @@
 
          } else {
              this.userId = fields[0];
-             this.passwordHash = ((fields[1].equals("none")) ? null : fields[1]);;
+             this.passwordHash = ((fields[1].equals("none")) ? null : fields[1]);
          }
      }
 
