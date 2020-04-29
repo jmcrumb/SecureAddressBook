@@ -12,13 +12,15 @@
  import java.nio.file.Files;
  import java.nio.file.Path;
  import java.nio.file.Paths;
- import java.time.LocalDateTime;
+ import java.time.LocalDate;
+ import java.time.LocalTime;
  import java.time.format.DateTimeFormatter;
  import java.time.format.FormatStyle;
  import java.util.ArrayList;
  import java.util.List;
 
- import static java.nio.file.StandardOpenOption.*;
+ import static java.nio.file.StandardOpenOption.CREATE;
+ import static java.nio.file.StandardOpenOption.WRITE;
 
 
  public class AuditLog {
@@ -26,28 +28,32 @@
      @SuppressWarnings("InnerClassMayBeStatic")
      private final class DataHolder {
          DataHolder(String commandType, String userName) {
-             this.currentTime = LocalDateTime.now();
+             this.time = LocalTime.now();
+             this.date = LocalDate.now();
              this.commandType = commandType;
-             this.userName = userName;
+             this.userId = (userName != null) ? userName : "NO USER LOGGED IN";
          }
 
          DataHolder(String dataString) {
              String[] sa = dataString.split(", ");
-             this.currentTime = LocalDateTime.parse(sa[0] + " " + sa[1]);
+             this.date = LocalDate.parse(sa[0], DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+             this.time = LocalTime.parse(sa[1], DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
              this.commandType = sa[2];
-             this.userName = sa[3];
+             this.userId = sa[3];
          }
 
-         final LocalDateTime currentTime;
+         final LocalDate date;
+         final LocalTime time;
+
          final String commandType;
-         final String userName;
+         final String userId;
 
          @Override
          public String toString() {
-             return this.currentTime.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) + ", " +
-               this.currentTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) + ", " +
+             return this.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) + ", " +
+               this.time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) + ", " +
                this.commandType + ", " +
-               this.userName;
+               this.userId;
          }
      }
 
@@ -69,7 +75,7 @@
 
      private void fileToList() throws IOException {
 
-        try {
+         try {
              Path f = Paths.get(LOG_FILE_NAME);
              if (Files.exists(f)) {
                  List<String> ls = Files.readAllLines(Paths.get(LOG_FILE_NAME));
@@ -77,9 +83,9 @@
                      ls.forEach((v) -> fifo.add(new DataHolder(v)));
                  }
              }
-         }catch (IOException e){
-            throw new IOException("failed to read AuditLog");
-        }
+         } catch (IOException e) {
+             throw new IOException("failed to read AuditLog");
+         }
 
      }
 
@@ -111,5 +117,23 @@
          }
          listToFile();
 
+         logInstance = this; //update self across all other instances
+
      }
+
+
+     public String[] getFilteredArray(String userId) {
+         return fifo.stream()
+           .filter(e -> e.userId.equals(userId))
+           .map(DataHolder::toString)
+           .toArray(String[]::new);
+     }
+
+     public String[] getArray() {
+         return fifo.stream()
+           .map(DataHolder::toString)
+           .toArray(String[]::new);
+     }
+
+
  }

@@ -12,7 +12,7 @@ import com.AddressBook.Database.UserDatabase;
 import com.AddressBook.UserEntry.UserEntry;
 
  public class AddUser extends Command{
-    private String userID;
+    private final String userID;
     //Maximum size of userID
     private final int MAX_SIZE = 16;
 
