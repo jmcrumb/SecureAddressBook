@@ -21,15 +21,14 @@
          this.passwordHash = ue.passwordHash;
      }
 
-     public UserEntry(String userEntryString)    //uncertain about this: both constructors just take strings
-     {
+     public UserEntry(String userEntryString) {
          String[] fields = userEntryString.split(";");
          if (fields.length != 2) {
              throw new RuntimeException("invalid user entry string \n");
 
          } else {
              this.userId = fields[0];
-             this.passwordHash = fields[1];
+             this.passwordHash = ((fields[1].equals("none")) ? null : fields[1]);
          }
      }
 
@@ -38,7 +37,7 @@
      }
 
      public String toString() {
-         return this.userId + ";" + this.passwordHash;
+         return this.userId + ";" + ((this.passwordHash == null) ? "none" : this.passwordHash);
      }
 
      public boolean hasLoggedIn() {
