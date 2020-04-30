@@ -4,8 +4,15 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 
 
 
-### To Debug
-- GetRecord.java (Now causes a "User Database Failed to Write!" after two ADR commands)
+### To Fix
+- [ ] when user changes password need to reset all the things
+   - privateKey
+   - adresses
+- [ ] when admin changes password
+   - all user stuff
+   - auditLog
+      - log entries
+      - private key
 
 
 ### Bug-Free
