@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.LocalDate;
@@ -138,14 +137,14 @@ public class AuditLog {
         }
     }
     
-    private List<DataHolder> decryptEntries(PrivateKey decryptKey) throws IOException {
+    private List<DataHolder> decryptEntries(PrivateKey decryptKey) throws IOException, Exception {
         List<DataHolder> decrypted = new ArrayList<DataHolder>();
         EncryptedEntry lastEntry = null;
         for (EncryptedEntry entry : fifo) {
             String decryptedEntry = Encryption.decryptWithRSA(decryptKey, entry.encryptedData);
             DataHolder data = new DataHolder(decryptedEntry);
 
-            String hashes = Encryption.decryptWithRSA(UserDatabase.getInstance().get(data.userId).publicKey, entry.signature);
+            String hashes = Encryption.decryptWithRSA(Encryption.publicKeyFromB64(UserDatabase.getInstance().get(data.userId).publicKey), entry.signature);
             String entryHash = hashes.split(";")[0];
             String lastSignature = hashes.split(";")[1];
             String calculatedHash = Encryption.hashSHA256(decryptedEntry);
@@ -203,11 +202,11 @@ public class AuditLog {
 
     }
 
-    public String[] getFilteredArray(String userId, PrivateKey decryptKey) throws IOException {
+    public String[] getFilteredArray(String userId, PrivateKey decryptKey) throws IOException, Exception {
         return decryptEntries(decryptKey).stream().filter(e -> e.userId.equals(userId)).map(DataHolder::toString).toArray(String[]::new);
     }
 
-    public String[] getArray(PrivateKey decryptKey) throws IOException {
+    public String[] getArray(PrivateKey decryptKey) throws IOException, Exception {
         return decryptEntries(decryptKey).stream().map(DataHolder::toString).toArray(String[]::new);
     }
 
