@@ -19,7 +19,11 @@ public class UserInput {
     }
 
 
-    public String getNextInput() {
+    public String getNextInput(boolean isLogIn) {
+        if(isLogIn)
+        {
+            return cnsl.readPassword();
+        }
         return cnsl.readLine();
     }
 
