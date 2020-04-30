@@ -115,8 +115,9 @@ public class Encryption {
         return kf.generatePublic(ks);
     }
 
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
     
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
     public static String bytesToString(byte[] data) {
         char[] str = new char[data.length * 2];
         for (int j = 0; j < data.length; j++) {
