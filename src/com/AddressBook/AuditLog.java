@@ -91,10 +91,10 @@
      }
 
      private void logRecovery() throws IOException {
-        UserInput.getInstance().sendOutput("Failed to read Audit Log\n"
+        UserInput.getInstance(false).sendOutput("Failed to read Audit Log\n"
         + "Please enter the number of the action which you wish to take: \n"
         + "1. Terminate Audit Log read \n2. Reset Log");
-        String input = UserInput.getInstance().getNextInput();
+        String input = UserInput.getInstance(false).getNextInput();
         
         try {
             int i = Integer.parseInt(input.trim());
@@ -103,11 +103,11 @@
             else if(i == 2)
                 Files.delete(Paths.get(LOG_FILE_NAME));
             else {
-                UserInput.getInstance().sendOutput("Input not recognized.  Please try again.");
+                UserInput.getInstance(false).sendOutput("Input not recognized.  Please try again.");
                 logRecovery();
             }
         } catch (NumberFormatException e) {
-            UserInput.getInstance().sendOutput("Input not recognized.  Please try again.");
+            UserInput.getInstance(false).sendOutput("Input not recognized.  Please try again.");
             logRecovery();
         }
         

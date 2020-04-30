@@ -8,18 +8,26 @@ public class UserInput {
 
     private Console cnsl;
 
-    private UserInput() {
+    private UserInput(boolean isLogIn) {
+        if(isLogIn)
+        {
+            return cnsl.readPassword();
+        }
         cnsl = System.console();
     }
 
 
-    public static UserInput getInstance() {
-        if (instance == null) instance = new UserInput();
+    public static UserInput getInstance(boolean isLogIn) {
+        if (instance == null) instance = new UserInput(boolean isLogIn);
         return instance;
     }
 
 
-    public String getNextInput() {
+    public String getNextInput(boolean isLogIn) {
+        if(isLogIn)
+        {
+            return cnsl.readPassword();
+        }
         return cnsl.readLine();
     }
 
