@@ -17,8 +17,8 @@ public class UserInput {
     }
 
 
-    public static UserInput getInstance() {
-        if (instance == null) instance = new UserInput();
+    public static UserInput getInstance(boolean isLogIn) {
+        if (instance == null) instance = new UserInput(boolean isLogIn);
         return instance;
     }
 
