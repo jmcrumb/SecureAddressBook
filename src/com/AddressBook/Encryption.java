@@ -78,10 +78,10 @@ public class Encryption {
         kpg.initialize(2048);
         KeyPair kp = kpg.generateKeyPair();
         return kp;
-
     }
 
-    
+
+
     public static String decryptWithRSA(Key key, String encrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, key);
@@ -95,7 +95,25 @@ public class Encryption {
         return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public static Key readPrivateKey(String filename, AddressDatabase.Decrypter decrypter) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public static String keyToB64(Key k){
+        return Base64.getEncoder().encodeToString(k.getEncoded());
+    }
+    public static PrivateKey privateKeyFromB64(String b64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] bytes = Base64.getDecoder().decode(b64key);
+        /* Generate private key. */
+        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(bytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePrivate(ks);
+    }
+
+    public static PublicKey publicKeyFromB64(String b64key) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        byte[] bytes = Base64.getDecoder().decode(b64key);
+        X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(ks);
+    }
+
+    public static PrivateKey readPrivateKey(String filename, AddressDatabase.Decrypter decrypter) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         /* Read all bytes from the private key file */
         Path path = Paths.get(filename);
         byte[] bytes = Files.readAllBytes(path);
@@ -107,6 +125,7 @@ public class Encryption {
 
     public static PublicKey readPublicKey(String filename) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         // from https://www.novixys.com/blog/how-to-generate-rsa-keys-java/
+
         Path path = Paths.get(filename);
         byte[] bytes = Files.readAllBytes(path);
 

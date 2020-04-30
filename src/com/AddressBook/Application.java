@@ -55,12 +55,14 @@ public class Application {
         if (command == null)
             return "Could not find command. Please try again or type 'HLP' for a list of commands\n";
         boolean isAuthorized = Authorization.verify(command);
+        String userId = User.getInstance().getUserId();
         String s = "";
         if (isAuthorized)
             s = command.execute();
         else
             throw new IllegalAccessError();
-        AuditLog.getInstance().logCommand(command, isAuthorized);
+        userId = (User.getInstance().getUserId() == null) ? userId : User.getInstance().getUserId();
+//        AuditLog.getInstance().logCommand(command, isAuthorized, userId);
         return s;
     }
 
