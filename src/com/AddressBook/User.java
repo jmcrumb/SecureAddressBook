@@ -55,6 +55,10 @@ public class User {
         return Encryption.decrypt(data, DBKey);
     }
 
+    public String sign(String data) {
+        return Encryption.encryptWithRSA(entry.privateKey, data);
+    }
+
 
     public int getAuthorization() {
         if (entry == null) return 0;
