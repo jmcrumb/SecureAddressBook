@@ -8,7 +8,11 @@ public class UserInput {
 
     private Console cnsl;
 
-    private UserInput() {
+    private UserInput(boolean isLogIn) {
+        if(isLogIn)
+        {
+            return cnsl.readPassword();
+        }
         cnsl = System.console();
     }
 
