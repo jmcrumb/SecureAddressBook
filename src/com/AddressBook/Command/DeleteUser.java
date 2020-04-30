@@ -8,7 +8,6 @@
 
  import com.AddressBook.Authorization;
  import com.AddressBook.Database.UserDatabase;
- import com.AddressBook.UserInput;
 
  import java.io.IOException;
 
@@ -29,13 +28,13 @@
              {
                  userDatabase.deleteUser(this.userid);
              }
-             if (!userDatabase.exists(this.userid))     //handles the admin trying to delete a user that doesn't exist
+             else     //handles the admin trying to delete a user that doesn't exist
              {
-                 UserInput.getInstance().sendOutput("User not found.\n");
+                 throw new CommandException("User not found.\n");
              }
-             return this.authorizedCode;  //returns authorized code for the audit log
+             return "OK";  //returns authorized code for the audit log
          } else {
-             return this.unauthorizedCode;   //returns null
+             return "OK";   //returns null
          }
      }
  }
