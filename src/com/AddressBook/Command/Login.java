@@ -57,7 +57,7 @@ public class Login extends Command {
         UserEntry entry = database.get(userid);
 
         if(!loginGuard(entry)) {
-            throw new CommandException("Too many password attemps on this account.  Please try again later.");
+            throw new CommandException("Too many password attempts on this account.  Please try again later.");
         }
 
         if (entry == null) {
