@@ -115,5 +115,24 @@ public class Encryption {
         return kf.generatePublic(ks);
     }
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    
+    public static String bytesToString(byte[] data) {
+        char[] str = new char[data.length * 2];
+        for (int j = 0; j < data.length; j++) {
+            int v = data[j] & 0xFF;
+            str[j * 2] = HEX_ARRAY[v >>> 4];
+            str[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(str);
+    }
 
+    public static byte[] stringToBytes(String data) {
+        int len = data.length();
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            bytes[i / 2] = (byte) ((Character.digit(data.charAt(i), 16) << 4) + Character.digit(data.charAt(i+1), 16));
+        }
+        return bytes;
+    }
 }
