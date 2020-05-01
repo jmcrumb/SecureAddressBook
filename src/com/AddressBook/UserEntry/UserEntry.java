@@ -6,8 +6,6 @@
   * */
  package com.AddressBook.UserEntry;
 
- import com.AddressBook.Encryption;
-
  public class UserEntry {
      final public String userId;
      final public String passwordHash;

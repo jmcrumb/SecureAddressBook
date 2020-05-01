@@ -147,18 +147,14 @@ public class AuditLog {
     }
 
     private void getPublicKey() throws Exception {
-        // if file doesn't exist
-        // if admin has logged in throw exception
-        // else wait for public key to be passed
-        // else
-        // set public key
-
         Path f = Paths.get(PUB_KEY_FILENAME);
-        if (!Files.exists(f)) {
-            UserEntry admin = UserDatabase.getInstance().get("admin");
-            if (!admin.hasLoggedIn()) {
+        UserEntry admin = UserDatabase.getInstance().get("admin");
+        if (admin.hasLoggedIn()) {
+            if (!Files.notExists(f)) {
                 throw new Exception("Audit log public key has been tampered with.");
             }
+        }
+        else {
             publicKey = null;
             return;
         }

@@ -6,7 +6,6 @@
  * */
 package com.AddressBook;
 
-import com.AddressBook.Database.AddressDatabase;
 import org.mindrot.BCrypt;
 
 import javax.crypto.BadPaddingException;

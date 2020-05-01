@@ -7,9 +7,6 @@
 
 package com.AddressBook.Command;
 
-import com.AddressBook.AuditLog;
-import com.AddressBook.User;
-
 import java.io.IOException;
 
 public class Exit extends Command {
