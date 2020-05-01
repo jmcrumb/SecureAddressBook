@@ -121,12 +121,12 @@ public class AuditLog {
     }
 
 
-    private AuditLog() throws Exception {
+    private AuditLog() throws AuditTamperException, AuditKeyException, IOException {
         getPublicKey();
 //        fileToList();
     }
 
-    public static AuditLog getInstance() throws Exception {
+    public static AuditLog getInstance() throws AuditTamperException, AuditKeyException, IOException {
         if (logInstance == null) {
             logInstance = new AuditLog();
         }
@@ -146,12 +146,12 @@ public class AuditLog {
         }
     }
 
-    private void getPublicKey() throws Exception {
+    private void getPublicKey() throws AuditTamperException, IOException {
         Path f = Paths.get(PUB_KEY_FILENAME);
         UserEntry admin = UserDatabase.getInstance().get("admin");
         if (admin.hasLoggedIn()) {
             if (!Files.notExists(f)) {
-                throw new Exception("Audit log public key has been tampered with.");
+                throw new AuditTamperException("Audit log public key has been tampered with.");
             }
         }
         else {
@@ -161,12 +161,12 @@ public class AuditLog {
 
         try {
             publicKey = Encryption.readPublicKey(f.toString());
-        } catch (Exception e) { // make this a better exception
-            throw new Exception("Audit log public key has been tampered with.");
+        } catch (Exception e) {
+            throw new AuditTamperException("Audit log public key has been tampered with.");
         }
     }
 
-    private List<DataEntry> decryptEntries(PrivateKey decryptKey) throws Exception {
+    private List<DataEntry> decryptEntries(PrivateKey decryptKey) throws AuditTamperException, Exception {
         List<DataEntry> decrypted = new ArrayList<DataEntry>();
         EncryptedEntry lastEntry = null;
         EncryptedEntry[] encrypted = fileToList()
@@ -184,9 +184,9 @@ public class AuditLog {
             String calculatedHash = Encryption.hashSHA256(decryptedEntry);
 
             if (!entryHash.equals(calculatedHash)) {
-                throw new UserVisibleException("Audit Log is compromised @ " + data.toString());
+                throw new AuditTamperException("Audit Log is compromised @ " + data.toString());
             } else if (lastEntry != null && !lastEntry.signature.equals(lastSignature)) {
-                throw new UserVisibleException("Audit Log is compromised between " + data.toString() + " and " + lastEntry.toString());
+                throw new AuditTamperException("Audit Log is compromised between " + data.toString() + " and " + lastEntry.toString());
             }
             decrypted.add(data);
             lastEntry = entry;
@@ -223,9 +223,9 @@ public class AuditLog {
     // Logs the command of all user
     // figure out where to put the file, make sure in same directory as program
     // Format is command(input);authorization(Yes/No)
-    public void logCommand(Command command, boolean authorized, String userId) throws Exception {
+    public void logCommand(Command command, boolean authorized, String userId) throws AuditKeyException, Exception {
         if (publicKey == null) {
-            throw new Exception("Audit log public key has not been set.");
+            throw new AuditKeyException("Audit log public key has not been set.");
         }
 
         if (command == null) {

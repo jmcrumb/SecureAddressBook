@@ -58,17 +58,21 @@ public class Encryption {
         return cipherText;
     }
 
-    public static String decrypt(byte[] data, String key) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
+    public static String decrypt(byte[] data, String key) {//throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
         byte[] decodeKey = Base64.getDecoder().decode(key.getBytes(StandardCharsets.UTF_8));
         decodeKey = Arrays.copyOf(decodeKey, 16);
         SecretKeySpec aesKey = new SecretKeySpec(decodeKey, "AES");
 
-        Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        try {
+            Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        aes.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
-        byte[] plainText = aes.doFinal(data);
-
-        return new String(plainText, StandardCharsets.UTF_8);
+            aes.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
+            byte[] plainText = aes.doFinal(data);
+            return new String(plainText, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 

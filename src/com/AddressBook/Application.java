@@ -30,9 +30,12 @@ public class Application {
                 ui.sendResponse(processInput(ui));
             } catch (CommandException | IOException ce) {
                 //TODO: Delete NEXT LINE once debugging is over
+                ce.printStackTrace();
                 System.out.println("***CommandException | IOException***");
                 ui.sendResponse(ce.getMessage());
             } catch (IllegalAccessError ae) {
+                //TODO: Delete NEXT LINE once debugging is over
+                ae.printStackTrace();
                 ui.sendResponse("The current user is not authorized");
             } catch (Exception e) {
                 //TODO: Delete NEXT LINE once debugging is over
@@ -64,7 +67,14 @@ public class Application {
         else
             throw new IllegalAccessError();
         userId = (User.getInstance().getUserId() == null) ? userId : User.getInstance().getUserId();
-        AuditLog.getInstance().logCommand(command, isAuthorized, userId);
+        try {
+            AuditLog.getInstance().logCommand(command, isAuthorized, userId);
+        } catch (AuditKeyException e) {
+            // do nothing I guess except for wait for the admin to login for the first time
+        } catch (AuditTamperException e) {
+            // possibly exit program here
+            UserInput.getInstance().sendOutput(e.getMessage() + "\n");
+        }
         return s;
     }
 
