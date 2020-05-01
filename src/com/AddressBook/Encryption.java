@@ -142,7 +142,7 @@ public class Encryption {
     public static void writePublicKey(String filename, PublicKey key) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         // from https://www.novixys.com/blog/how-to-generate-rsa-keys-java/
         Path path = Paths.get(filename);
-        Files.write(path, key.getEncoded());;
+        Files.write(path, key.getEncoded());
     }
 
 
