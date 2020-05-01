@@ -37,7 +37,7 @@ public class User {
     public void setUser(UserEntry entry, String DBKey) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
         this.entry = entry;
         this.DBKey = DBKey;
-        decryptedPrivateKey = decrypt(Encryption.stringToBytes(entry.encryptedPrivateKey));
+        decryptedPrivateKey = ((entry == null) ? null : decrypt(Encryption.stringToBytes(entry.encryptedPrivateKey)));
         instance = this;
     }
 

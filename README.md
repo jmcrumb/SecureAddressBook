@@ -17,7 +17,9 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
    - auditLog
       - log entries
       - private key
-
+- [x] unnecessary exception thrown in audit log
+-  [ ] Audit log encrypted entry error at ln 81 -> prints private key to system, which is not good
+-  [ ] displays  recoverable error message at log in even though it logs the user in
 
 ### Bug-Free
 - DeleteRecord.java  - fixed 4/27/20 - 9:26pm

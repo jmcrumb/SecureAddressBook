@@ -72,6 +72,7 @@ public class AuditLog {
         public String signature;
 
         EncryptedEntry(String dataString) {
+            System.out.println(dataString);
             this.encryptedData = dataString.split(";")[0];
             this.signature = dataString.split(";")[1];
         }
@@ -241,9 +242,7 @@ public class AuditLog {
             data = new DataEntry(command.getAuthorizedCode(), userId);
         } else if (!authorized && command.getUnauthorizedCode() != null) {
             data = new DataEntry(command.getUnauthorizedCode(), userId);
-        } else {
-            throw new Exception("An unknown error occured.");
-        }
+        } 
 
 
         EncryptedEntry newEntry = null;
