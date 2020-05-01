@@ -64,6 +64,7 @@ public class Application {
         else
             throw new IllegalAccessError();
         userId = (User.getInstance().getUserId() == null) ? userId : User.getInstance().getUserId();
+        System.out.println(userId);
         AuditLog.getInstance().logCommand(command, isAuthorized, userId);
         return s;
     }
