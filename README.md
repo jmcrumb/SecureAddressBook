@@ -12,7 +12,7 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 - [X] when user changes password need to reset all the things
    - privateKey
    - adresses
-- [ ] when admin changes password
+- [X] when admin changes password
    - all user stuff
    - auditLog
       - log entries
