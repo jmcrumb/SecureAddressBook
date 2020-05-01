@@ -4,8 +4,19 @@ Project for COMP 365 [![CodeFactor](https://www.codefactor.io/repository/github/
 
 
 
-### To Debug
-- GetRecord.java (Now causes a "User Database Failed to Write!" after two ADR commands)
+### To Fix
+- [ ] replace IOexceptions that should be shown to the user with a UserVisibleExceptions
+   - [X] create UserVisibleExceptions
+   - [ ] in system show DatabaseException's but no IOExceptions
+   - [X] replace exeptions in DBs
+- [X] when user changes password need to reset all the things
+   - privateKey
+   - adresses
+- [X] when admin changes password
+   - all user stuff
+   - auditLog
+      - log entries
+      - private key
 
 
 ### Bug-Free

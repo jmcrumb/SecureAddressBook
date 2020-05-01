@@ -51,11 +51,11 @@ public class ChangePassword extends Command {
         }
 
         String newPassword;
-        UserInput.getInstance().sendOutput("Enter a password: ");
-        newPassword = UserInput.getInstance().getNextInput();
-        UserInput.getInstance().sendOutput("Reenter the same password: ");
+        UserInput.getInstance(true).sendOutput("Enter a password: ");
+        newPassword = UserInput.getInstance(true).getNextInput();
+        UserInput.getInstance(true).sendOutput("Reenter the same password: ");
 
-        if (newPassword.equals(UserInput.getInstance().getNextInput())) {
+        if (newPassword.equals(UserInput.getInstance(true).getNextInput())) {
             if (!isAlphanumeric(newPassword)) {
                 return "Password contains illegal characters";
             }
