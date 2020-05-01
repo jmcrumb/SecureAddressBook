@@ -1,101 +1,209 @@
- /*
-  * Title:          com.AddressBook
-  * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
-  * Last Modified:  4/22/20
-  * Description:
-  * */
- package com.AddressBook;
+/*
+ * Title:          com.AddressBook
+ * Authors:        Miles Maloney, Caden Keese, Kanan Boubion, Maxon Crumb, Scott Spinali
+ * Last Modified:  4/22/20
+ * Description:
+ * */
+package com.AddressBook;
 
- import com.AddressBook.Command.Command;
+import com.AddressBook.Command.Command;
+import com.AddressBook.Database.UserDatabase;
+import com.AddressBook.UserEntry.UserEntry;
 
- import java.io.IOException;
- import java.nio.file.Files;
- import java.nio.file.Path;
- import java.nio.file.Paths;
- import java.time.LocalDate;
- import java.time.LocalTime;
- import java.time.format.DateTimeFormatter;
- import java.time.format.FormatStyle;
- import java.util.ArrayList;
- import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
- import static java.nio.file.StandardOpenOption.CREATE;
- import static java.nio.file.StandardOpenOption.WRITE;
+import static com.AddressBook.Encryption.*;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+
+public class AuditLog {
 
 
- public class AuditLog {
+    @SuppressWarnings("InnerClassMayBeStatic")
+    private final class DataEntry {
+        DataEntry(String commandType, String userName) {
+            this.time = LocalTime.now();
+            this.date = LocalDate.now();
+            this.commandType = commandType;
+            this.userId = (userName != null) ? userName : "NO USER LOGGED IN";
+        }
 
-     @SuppressWarnings("InnerClassMayBeStatic")
-     private final class DataHolder {
-         DataHolder(String commandType, String userName) {
-             this.time = LocalTime.now();
-             this.date = LocalDate.now();
-             this.commandType = commandType;
-             this.userId = (userName != null) ? userName : "NO USER LOGGED IN";
-         }
+        DataEntry(String dataString) {
+            String[] sa = dataString.split(", ");
+            this.date = LocalDate.parse(sa[0], DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+            this.time = LocalTime.parse(sa[1], DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
+            this.commandType = sa[2];
+            this.userId = sa[3];
+        }
 
-         DataHolder(String dataString) {
-             String[] sa = dataString.split(", ");
-             this.date = LocalDate.parse(sa[0], DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
-             this.time = LocalTime.parse(sa[1], DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
-             this.commandType = sa[2];
-             this.userId = sa[3];
-         }
+        final LocalDate date;
+        final LocalTime time;
 
-         final LocalDate date;
-         final LocalTime time;
+        final String commandType;
+        final String userId;
 
-         final String commandType;
-         final String userId;
+        @Override
+        public String toString() {
+            return this.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) + ", "
+              + this.time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) + ", " + this.commandType
+              + ", " + this.userId;
+        }
+    }
 
-         @Override
-         public String toString() {
-             return this.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) + ", " +
-               this.time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) + ", " +
-               this.commandType + ", " +
-               this.userId;
-         }
-     }
+    @SuppressWarnings("InnerClassMayBeStatic")
+    private final class EncryptedEntry {
+        public final String encryptedData;
+        public String signature;
 
-     private final String LOG_FILE_NAME = ".logHistory";
+        EncryptedEntry(String dataString) {
+            this.encryptedData = dataString.split(";")[0];
+            this.signature = dataString.split(";")[1];
+        }
 
-     private static AuditLog logInstance;
-     private final List<DataHolder> fifo = new ArrayList<>();
+        EncryptedEntry(DataEntry de, EncryptedEntry lastEntry) throws Exception {
+            encryptedData = Encryption.encryptWithRSA(publicKey, de.toString());
+            String entryHash = Encryption.hashSHA256(de.toString());
+            signature = User.getInstance().sign(entryHash + ":" + lastEntry.signature);
+        }
 
-     private AuditLog() throws IOException {
-         fileToList();
-     }
+        EncryptedEntry(DataEntry de) throws Exception {
+            encryptedData = Encryption.encryptWithRSA(publicKey, de.toString());
+            String entryHash = Encryption.hashSHA256(de.toString());
+            signature = User.getInstance().sign(entryHash + ":");
+        }
 
-     public static AuditLog getInstance() throws IOException {
-         if (logInstance == null) {
-             logInstance = new AuditLog();
-         }
-         return logInstance;
-     }
+        @Override
+        public String toString() {
+            return encryptedData + ";" + signature;
+        }
+    }
 
-     private void fileToList() throws IOException {
+    private final String LOG_FILE_NAME = ".logHistory";
+    private static final String PUB_KEY_FILENAME = ".logkey";
+    private static final String PRV_KEY_FILENAME = ".auditPrvKey";
+    private static PublicKey publicKey;
+    private static AuditLog logInstance;
 
-         try {
-             Path f = Paths.get(LOG_FILE_NAME);
-             if (Files.exists(f)) {
-                 List<String> ls = Files.readAllLines(Paths.get(LOG_FILE_NAME));
-                 if (ls.size() > 0) {
-                     ls.forEach((v) -> fifo.add(new DataHolder(v)));
-                 }
-             }
-         } catch (IOException e) {
-             logRecovery();
-             throw new IOException();
-         }
 
-     }
+    public static void setPrivateKey(PrivateKey key, Encrypter encrypter) throws GeneralSecurityException, IOException {
+        byte[] ba = encrypter.encrypt(keyToB64(key));
+        String encryptedKey = bytesToString(ba);
+        Path p = Paths.get(PRV_KEY_FILENAME);
+        Files.writeString(p, encryptedKey);
+    }
 
-     private void logRecovery() throws IOException {
+    public static PrivateKey getPrivateKey(Decrypter decrypter) throws IOException, GeneralSecurityException {
+        Path p = Paths.get(PRV_KEY_FILENAME);
+        String encryptedKey = Files.readString(p);
+        byte[] decryptedKey = stringToBytes(encryptedKey);
+        String b64Key = decrypter.decrypt(decryptedKey);
+        return privateKeyFromB64(b64Key);
+    }
+
+    public static void setPublicKey(PublicKey key) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        writePublicKey(PUB_KEY_FILENAME, key);
+    }
+
+
+    private AuditLog() throws Exception {
+        getPublicKey();
+//        fileToList();
+    }
+
+    public static AuditLog getInstance() throws Exception {
+        if (logInstance == null) {
+            logInstance = new AuditLog();
+        }
+        return logInstance;
+    }
+
+    private List<String> fileToList() throws IOException {
+        List<String> ls = new LinkedList<>();
+        try {
+            Path f = Paths.get(LOG_FILE_NAME);
+            if (Files.exists(f)) {
+                ls = Files.readAllLines(f);
+            }
+            return ls;
+        } catch (IOException e) {
+            throw new IOException("failed to read AuditLog");
+        }
+    }
+
+    private void getPublicKey() throws Exception {
+        // if file doesn't exist
+        // if admin has logged in throw exception
+        // else wait for public key to be passed
+        // else
+        // set public key
+
+        Path f = Paths.get(PUB_KEY_FILENAME);
+        if (!Files.exists(f)) {
+            UserEntry admin = UserDatabase.getInstance().get("admin");
+            if (!admin.hasLoggedIn()) {
+                throw new Exception("Audit log public key has been tampered with.");
+            }
+            publicKey = null;
+            return;
+        }
+
+        try {
+            publicKey = Encryption.readPublicKey(f.toString());
+        } catch (Exception e) { // make this a better exception
+            throw new Exception("Audit log public key has been tampered with.");
+        }
+    }
+
+    private List<DataEntry> decryptEntries(PrivateKey decryptKey) throws Exception {
+        List<DataEntry> decrypted = new ArrayList<DataEntry>();
+        EncryptedEntry lastEntry = null;
+        EncryptedEntry[] encrypted = fileToList()
+          .stream()
+          .map(EncryptedEntry::new)
+          .toArray(EncryptedEntry[]::new);
+
+        for (EncryptedEntry entry : encrypted) {
+            String decryptedEntry = Encryption.decryptWithRSA(decryptKey, entry.encryptedData);
+            DataEntry data = new DataEntry(decryptedEntry);
+
+            String hashes = Encryption.decryptWithRSA(Encryption.publicKeyFromB64(UserDatabase.getInstance().get(data.userId).publicKey), entry.signature);
+            String entryHash = hashes.split(";")[0];
+            String lastSignature = hashes.split(";")[1];
+            String calculatedHash = Encryption.hashSHA256(decryptedEntry);
+
+            if (!entryHash.equals(calculatedHash)) {
+                throw new UserVisibleException("Audit Log is compromised @ " + data.toString());
+            } else if (lastEntry != null && !lastEntry.signature.equals(lastSignature)) {
+                throw new UserVisibleException("Audit Log is compromised between " + data.toString() + " and " + lastEntry.toString());
+            }
+            decrypted.add(data);
+            lastEntry = entry;
+        }
+        return decrypted;
+    }
+
+    private void logRecovery() throws IOException {
         UserInput.getInstance(false).sendOutput("Failed to read Audit Log\n"
-        + "Please enter the number of the action which you wish to take: \n"
-        + "1. Terminate Audit Log read \n2. Reset Log");
+          + "Please enter the number of the action which you wish to take: \n"
+          + "1. Terminate Audit Log read \n2. Reset Log");
         String input = UserInput.getInstance(false).getNextInput();
-        
+
         try {
             int i = Integer.parseInt(input.trim());
             if(i == 1)
@@ -110,54 +218,85 @@
             UserInput.getInstance(false).sendOutput("Input not recognized.  Please try again.");
             logRecovery();
         }
-        
-     }
 
-     private void listToFile() throws IOException {
-         List<String> ls = new ArrayList<>();
-         fifo.forEach((v) -> ls.add(v.toString()));
-         String output = String.join("\n", ls);
-         Files.writeString(Paths.get(LOG_FILE_NAME), output, CREATE, WRITE);
-     }
+    }
 
-     //Logs the command of all user
-     //figure out where to put the file, make sure in same directory as program
-     //Format is command(input);authorization(Yes/No)
-     public void logCommand(Command command, boolean authorized) throws IOException {
+    private void listToFile(List<String> list) throws IOException {
+        String output = String.join("\n", list);
+        Files.writeString(Paths.get(LOG_FILE_NAME), output, TRUNCATE_EXISTING, CREATE);
+    }
 
-         if (command == null) {
-             return;
-         }
+    // Logs the command of all user
+    // figure out where to put the file, make sure in same directory as program
+    // Format is command(input);authorization(Yes/No)
+    public void logCommand(Command command, boolean authorized, String userId) throws Exception {
+        if (publicKey == null) {
+            throw new Exception("Audit log public key has not been set.");
+        }
 
-         if (fifo.size() >= 512) {
-             fifo.remove(0);
-         }
+        if (command == null) {
+            return;
+        }
 
-
-         if (authorized && command.getAuthorizedCode() != null) {
-             fifo.add(new DataHolder(command.getAuthorizedCode(), User.getInstance().getUserId()));
-         } else if (!authorized && command.getUnauthorizedCode() != null) {
-             fifo.add(new DataHolder(command.getUnauthorizedCode(), User.getInstance().getUserId()));
-         }
-         listToFile();
-
-         logInstance = this; //update self across all other instances
-
-     }
+        DataEntry data = null;
+        if (authorized && command.getAuthorizedCode() != null) {
+            data = new DataEntry(command.getAuthorizedCode(), userId);
+        } else if (!authorized && command.getUnauthorizedCode() != null) {
+            data = new DataEntry(command.getUnauthorizedCode(), userId);
+        } else {
+            throw new Exception("An unknown error occured.");
+        }
 
 
-     public String[] getFilteredArray(String userId) {
-         return fifo.stream()
-           .filter(e -> e.userId.equals(userId))
-           .map(DataHolder::toString)
-           .toArray(String[]::new);
-     }
+        EncryptedEntry newEntry = null;
+        List<String> entryStringList = fileToList();
+        EncryptedEntry lastEntry;
+        if (entryStringList.size() > 0) {
+            lastEntry = new EncryptedEntry(entryStringList.get(entryStringList.size() - 1));
+            newEntry = new EncryptedEntry(data, lastEntry);
+        } else {
+            newEntry = new EncryptedEntry(data);
+        }
 
-     public String[] getArray() {
-         return fifo.stream()
-           .map(DataHolder::toString)
-           .toArray(String[]::new);
-     }
+        entryStringList.add(newEntry.toString());
+        listToFile(entryStringList);
+        logInstance = this; // update self across all other instances
 
+    }
 
- }
+    public String[] getFilteredArray(String userId, PrivateKey decryptKey) throws Exception {
+        return decryptEntries(decryptKey)
+          .stream()
+          .filter(e -> e.userId.equals(userId))
+          .map(DataEntry::toString).toArray(String[]::new);
+    }
+
+    public String[] getArray(PrivateKey decryptKey) throws Exception {
+        return decryptEntries(decryptKey)
+          .stream()
+          .map(DataEntry::toString)
+          .toArray(String[]::new);
+    }
+
+    public void reEncryptEntries(Decrypter decrypter, Encrypter encrypter) throws Exception {
+        PrivateKey pk = getPrivateKey(decrypter);
+        setPrivateKey(pk, encrypter);
+
+        List<DataEntry> ls = decryptEntries(pk);
+        List<EncryptedEntry> le = new LinkedList<>();
+        EncryptedEntry lastEntry = null;
+        for (DataEntry entry : ls) {
+            EncryptedEntry newEntry;
+            if (ls.size() > 0) {
+                newEntry = new EncryptedEntry(entry);
+            } else {
+                newEntry = (new EncryptedEntry(entry, lastEntry));
+            }
+            le.add(newEntry);
+            lastEntry = newEntry;
+        }
+        listToFile(le.stream().map(EncryptedEntry::toString).collect(Collectors.toList()));
+
+    }
+
+}

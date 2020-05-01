@@ -23,6 +23,7 @@
  import com.AddressBook.User;
  import com.AddressBook.AddressEntry;
  import com.AddressBook.Database.AddressDatabase;
+ import com.AddressBook.UserVisibleException;
 
  public class AddRecord extends Command {
 
@@ -71,7 +72,7 @@
       * Otherwise, there is no change to the system.
       */
      @Override
-     public String execute() throws CommandException, IOException, GeneralSecurityException {
+     public String execute() throws UserVisibleException, IOException, GeneralSecurityException {
          if (input.trim().equals("")) return "No recordID";
          parseInput();
          writeToDatabase();
@@ -167,7 +168,7 @@
      /**
       * Writes the fields into an AddressEntry to be passed to the Address Database for handling.
       */
-     protected void writeToDatabase() throws IOException, GeneralSecurityException {
+     protected void writeToDatabase() throws IOException, GeneralSecurityException, UserVisibleException {
 //        AddressEntry ae = new AddressEntry()
          AddressEntry ae = new AddressEntry(recordID, SN, GN, PEM, WEM, PPH, WPH, SA, CITY, STP, CTY, PC);
          User usr = User.getInstance();

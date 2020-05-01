@@ -16,6 +16,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,35 +79,58 @@ public class Encryption {
         kpg.initialize(2048);
         KeyPair kp = kpg.generateKeyPair();
         return kp;
-
     }
 
-    public static String decryptWithRSA(PublicKey key, String encrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    /**
+     * this interface is used to provide a lambda to encrypt a string when calling
+     */
+    public interface Encrypter {
+        byte[] encrypt(String plainText) throws GeneralSecurityException, UnsupportedEncodingException;
+    }
+
+    /**
+     * this interface is used to provide a lambda to decrypt a string
+     */
+    public interface Decrypter {
+        String decrypt(byte[] encrypted) throws GeneralSecurityException, UnsupportedEncodingException;
+    }
+
+
+    public static String decryptWithRSA(Key key, String encrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] bytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
-
-    public static String encryptWithRSA(PrivateKey key, String data) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public static String encryptWithRSA(Key key, String data) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public static PrivateKey readPrivateKey(String filename, AddressDatabase.Decrypter decrypter) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-        /* Read all bytes from the private key file */
-        Path path = Paths.get(filename);
-        byte[] bytes = Files.readAllBytes(path);
+    public static String keyToB64(Key k) {
+        return Base64.getEncoder().encodeToString(k.getEncoded());
+    }
+
+    public static PrivateKey privateKeyFromB64(String b64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] bytes = Base64.getDecoder().decode(b64key);
         /* Generate private key. */
         PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(bytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(ks);
     }
 
+    public static PublicKey publicKeyFromB64(String b64key) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        byte[] bytes = Base64.getDecoder().decode(b64key);
+        X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(ks);
+    }
+
     public static PublicKey readPublicKey(String filename) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         // from https://www.novixys.com/blog/how-to-generate-rsa-keys-java/
+
         Path path = Paths.get(filename);
         byte[] bytes = Files.readAllBytes(path);
 
@@ -115,5 +139,31 @@ public class Encryption {
         return kf.generatePublic(ks);
     }
 
+    public static void writePublicKey(String filename, PublicKey key) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        // from https://www.novixys.com/blog/how-to-generate-rsa-keys-java/
+        Path path = Paths.get(filename);
+        Files.write(path, key.getEncoded());
+    }
 
+
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    public static String bytesToString(byte[] data) {
+        char[] str = new char[data.length * 2];
+        for (int j = 0; j < data.length; j++) {
+            int v = data[j] & 0xFF;
+            str[j * 2] = HEX_ARRAY[v >>> 4];
+            str[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(str);
+    }
+
+    public static byte[] stringToBytes(String data) {
+        int len = data.length();
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            bytes[i / 2] = (byte) ((Character.digit(data.charAt(i), 16) << 4) + Character.digit(data.charAt(i + 1), 16));
+        }
+        return bytes;
+    }
 }

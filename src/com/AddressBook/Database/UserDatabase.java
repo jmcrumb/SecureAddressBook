@@ -7,6 +7,7 @@
  package com.AddressBook.Database;
 
  import com.AddressBook.UserEntry.UserEntry;
+ import com.AddressBook.UserVisibleException;
 
  import java.io.IOException;
  import java.nio.file.Files;
@@ -65,7 +66,7 @@
          try {
              Files.write(path, toWrite, US_ASCII, CREATE, WRITE);
          } catch (IOException e) {
-             throw new IOException("User Database Failed to Write!");
+             throw new IOException("User Database Failed to Write!",e);
          }
      }
 
@@ -79,7 +80,7 @@
          try {
              Files.deleteIfExists(path);
          } catch (IOException e) {
-             throw new IOException("Failed to Delete User Database File!");
+             throw new IOException("Failed to Delete User Database File!",e);
          }
      }
 
@@ -98,7 +99,7 @@
              try {
                  return Files.readAllLines(path, US_ASCII);
              } catch (IOException e) {
-                 throw new IOException("Database exists and Failed to Read!");
+                 throw new IOException("Database exists and Failed to Read!",e);
              }
          }
      }
@@ -113,7 +114,7 @@
          List<String> l = readFile();
          if (l == null) {
              map = new HashMap<>();
-             map.put("admin", new UserEntry("admin", null));
+             map.put("admin", new UserEntry("admin", null, null, null));
          } else {
              // check to make sure hasn't been modified to be oversized
              if (l.size() > MAX_ACCOUNTS) {
@@ -173,12 +174,12 @@
       * @param userId User to delete
       * @throws IOException if fails to find account
       */
-     public void deleteUser(String userId) throws IOException {
+     public void deleteUser(String userId) throws IOException, UserVisibleException {
          if (exists(userId)) {
              map.remove(userId);
              updateDbFile();
          } else {
-             throw new IOException("Account doesn't exist");
+             throw new UserVisibleException("Account doesn't exist");
          }
      }
 
@@ -198,13 +199,13 @@
       * @param entry the entry to be saved in the database
       * @throws IOException if at #{@value MAX_ACCOUNTS} accounts
       */
-     public void set(UserEntry entry) throws IOException {
+     public void set(UserEntry entry) throws IOException, UserVisibleException {
          // if the max # of accounts isn't reached or just updating account that exists
          if (!isFull() || exists(entry.userId)) {
              map.put(entry.userId, entry);
              updateDbFile();
          } else {
-             throw new IOException("Already at max accounts!" +
+             throw new UserVisibleException("Already at max accounts!" +
                " delete one before adding a new one");
          }
      }

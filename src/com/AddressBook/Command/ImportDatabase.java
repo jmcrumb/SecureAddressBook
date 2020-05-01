@@ -8,6 +8,7 @@
 
  import com.AddressBook.Database.AddressDatabase;
  import com.AddressBook.User;
+ import com.AddressBook.UserVisibleException;
 
 
  import java.io.IOException;
@@ -74,7 +75,7 @@
 
 
      @Override
-     public String execute() throws CommandException, IOException, GeneralSecurityException {
+     public String execute() throws UserVisibleException, IOException, GeneralSecurityException {
          final User user = User.getInstance();
          verifyUser(user);
          Path p = checkInput();

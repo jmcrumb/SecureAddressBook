@@ -8,6 +8,7 @@
 
  import com.AddressBook.Authorization;
  import com.AddressBook.Database.UserDatabase;
+ import com.AddressBook.UserVisibleException;
 
  import java.io.IOException;
 
@@ -20,7 +21,7 @@
          this.userid = userid;
      }
 
-     public String execute() throws CommandException, IOException {
+     public String execute() throws UserVisibleException, IOException {
          boolean currAuth = Authorization.verify(this);
          if (currAuth) {
              UserDatabase userDatabase = UserDatabase.getInstance();

@@ -12,6 +12,8 @@ import com.AddressBook.Command.Command;
 import com.AddressBook.Command.CommandException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 
 public class Application {
 
@@ -55,16 +57,18 @@ public class Application {
         if (command == null)
             return "Could not find command. Please try again or type 'HLP' for a list of commands\n";
         boolean isAuthorized = Authorization.verify(command);
+        String userId = User.getInstance().getUserId();
         String s = "";
         if (isAuthorized)
             s = command.execute();
         else
             throw new IllegalAccessError();
-        AuditLog.getInstance().logCommand(command, isAuthorized);
+        userId = (User.getInstance().getUserId() == null) ? userId : User.getInstance().getUserId();
+        AuditLog.getInstance().logCommand(command, isAuthorized, userId);
         return s;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws GeneralSecurityException, UnsupportedEncodingException {
         //initialize system to a state of no user
         User.getInstance().setUser(null, null);
         //execute program

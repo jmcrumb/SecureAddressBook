@@ -12,8 +12,13 @@ public class User {
 
     private static User instance = null;
 
+    public UserEntry getEntry() {
+        return entry;
+    }
+
     private UserEntry entry;
     private String DBKey;
+    private String decryptedPrivateKey;
 
 
     private User() {
@@ -29,9 +34,10 @@ public class User {
     }
 
 
-    public void setUser(UserEntry entry, String DBKey) {
+    public void setUser(UserEntry entry, String DBKey) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
         this.entry = entry;
         this.DBKey = DBKey;
+        decryptedPrivateKey = decrypt(Encryption.stringToBytes(entry.encryptedPrivateKey));
         instance = this;
     }
 
@@ -54,6 +60,11 @@ public class User {
         }
         return Encryption.decrypt(data, DBKey);
     }
+
+    public String sign(String data) throws Exception {
+        return Encryption.encryptWithRSA(Encryption.privateKeyFromB64(decryptedPrivateKey), data);
+    }
+
 
 
     public int getAuthorization() {

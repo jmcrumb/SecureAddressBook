@@ -26,6 +26,7 @@ import com.AddressBook.Command.AddRecord;
 import com.AddressBook.AddressEntry;
 import com.AddressBook.Database.AddressDatabase;
 import com.AddressBook.User;
+import com.AddressBook.UserVisibleException;
 
 public class EditRecord extends AddRecord {
 
@@ -55,7 +56,7 @@ public class EditRecord extends AddRecord {
      *                          associated
      */
     @Override
-    public String execute() throws CommandException, IOException, GeneralSecurityException {
+    public String execute() throws UserVisibleException, IOException, GeneralSecurityException {
         parseInput();
         writeToDatabase();
         return "OK";
