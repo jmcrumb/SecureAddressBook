@@ -278,7 +278,6 @@ public class AddressDatabase {
         setFileFromMap(userId, encrypterNew, map);
     }
 
-
     public static AddressDatabase getInstance() {
         if (addressDatabase == null) {
             addressDatabase = new AddressDatabase();

@@ -77,16 +77,14 @@ public class AuditLog {
             this.signature = dataString.split(";")[1];
         }
 
-        EncryptedEntry(DataEntry de, EncryptedEntry lastEntry) throws Exception {
-            encryptedData = Encryption.encryptWithRSA(publicKey, de.toString());
-            String entryHash = Encryption.hashSHA256(de.toString());
-            signature = User.getInstance().sign(entryHash + ":" + lastEntry.signature);
-        }
-
         EncryptedEntry(DataEntry de) throws Exception {
             encryptedData = Encryption.encryptWithRSA(publicKey, de.toString());
             String entryHash = Encryption.hashSHA256(de.toString());
-            signature = User.getInstance().sign(entryHash + ":");
+            if (User.getInstance().getUserId() != null) {
+                signature = User.getInstance().sign(entryHash);
+            } else {
+                signature = entryHash;
+            }
         }
 
         @Override
@@ -114,6 +112,7 @@ public class AuditLog {
         String encryptedKey = Files.readString(p);
         byte[] decryptedKey = stringToBytes(encryptedKey);
         String b64Key = decrypter.decrypt(decryptedKey);
+        Files.writeString(Paths.get("test.key"), keyToB64(privateKeyFromB64(b64Key)));
         return privateKeyFromB64(b64Key);
     }
 
@@ -124,7 +123,7 @@ public class AuditLog {
 
     private AuditLog() throws Exception {
         getPublicKey();
-//        fileToList();
+
     }
 
     public static AuditLog getInstance() throws Exception {
@@ -173,28 +172,30 @@ public class AuditLog {
 
     private List<DataEntry> decryptEntries(PrivateKey decryptKey) throws Exception {
         List<DataEntry> decrypted = new ArrayList<DataEntry>();
-        EncryptedEntry lastEntry = null;
         EncryptedEntry[] encrypted = fileToList()
           .stream()
           .map(EncryptedEntry::new)
           .toArray(EncryptedEntry[]::new);
 
         for (EncryptedEntry entry : encrypted) {
+            System.out.println("entry.encryptedData = " + entry.encryptedData);
+            System.out.println("decryptKey = " + decryptKey);
             String decryptedEntry = Encryption.decryptWithRSA(decryptKey, entry.encryptedData);
             DataEntry data = new DataEntry(decryptedEntry);
-
-            String hashes = Encryption.decryptWithRSA(Encryption.publicKeyFromB64(UserDatabase.getInstance().get(data.userId).publicKey), entry.signature);
-            String entryHash = hashes.split(";")[0];
-            String lastSignature = hashes.split(";")[1];
+            String hash;
+            try {
+                hash = Encryption.decryptWithRSA(
+                  Encryption.publicKeyFromB64(
+                    UserDatabase.getInstance().get(data.userId).publicKey
+                  ), entry.signature);
+            } catch (Exception e) {
+                hash = entry.signature;
+            }
             String calculatedHash = Encryption.hashSHA256(decryptedEntry);
-
-            if (!entryHash.equals(calculatedHash)) {
+            if (!hash.equals(calculatedHash)) {
                 throw new UserVisibleException("Audit Log is compromised @ " + data.toString());
-            } else if (lastEntry != null && !lastEntry.signature.equals(lastSignature)) {
-                throw new UserVisibleException("Audit Log is compromised between " + data.toString() + " and " + lastEntry.toString());
             }
             decrypted.add(data);
-            lastEntry = entry;
         }
         return decrypted;
     }
@@ -237,24 +238,17 @@ public class AuditLog {
             return;
         }
 
-        DataEntry data = null;
+        DataEntry data;
         if (authorized && command.getAuthorizedCode() != null) {
             data = new DataEntry(command.getAuthorizedCode(), userId);
         } else if (!authorized && command.getUnauthorizedCode() != null) {
             data = new DataEntry(command.getUnauthorizedCode(), userId);
-        } 
-
-
-        EncryptedEntry newEntry = null;
-        List<String> entryStringList = fileToList();
-        EncryptedEntry lastEntry;
-        if (entryStringList.size() > 0) {
-            lastEntry = new EncryptedEntry(entryStringList.get(entryStringList.size() - 1));
-            newEntry = new EncryptedEntry(data, lastEntry);
         } else {
-            newEntry = new EncryptedEntry(data);
+            return;
         }
 
+        EncryptedEntry newEntry = new EncryptedEntry(data);
+        List<String> entryStringList = fileToList();
         entryStringList.add(newEntry.toString());
         listToFile(entryStringList);
         logInstance = this; // update self across all other instances
@@ -281,16 +275,10 @@ public class AuditLog {
 
         List<DataEntry> ls = decryptEntries(pk);
         List<EncryptedEntry> le = new LinkedList<>();
-        EncryptedEntry lastEntry = null;
         for (DataEntry entry : ls) {
             EncryptedEntry newEntry;
-            if (ls.size() > 0) {
-                newEntry = new EncryptedEntry(entry);
-            } else {
-                newEntry = (new EncryptedEntry(entry, lastEntry));
-            }
+            newEntry = new EncryptedEntry(entry);
             le.add(newEntry);
-            lastEntry = newEntry;
         }
         listToFile(le.stream().map(EncryptedEntry::toString).collect(Collectors.toList()));
 

@@ -95,7 +95,6 @@ public class Encryption {
         String decrypt(byte[] encrypted) throws GeneralSecurityException, UnsupportedEncodingException;
     }
 
-
     public static String decryptWithRSA(Key key, String encrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, key);
@@ -106,7 +105,9 @@ public class Encryption {
     public static String encryptWithRSA(Key key, String data) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+        byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
+        System.out.println("bytes.length = " + bytes.length);
+        return Base64.getEncoder().encodeToString(cipher.doFinal(bytes));
     }
 
     public static String keyToB64(Key k) {
