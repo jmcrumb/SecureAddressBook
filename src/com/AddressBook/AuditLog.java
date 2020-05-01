@@ -199,23 +199,21 @@ public class AuditLog {
     }
 
     private void logRecovery() throws IOException {
-        UserInput.getInstance(false).sendOutput("Failed to read Audit Log\n"
+        UserInput.getInstance().sendOutput("Failed to read Audit Log\n"
           + "Please enter the number of the action which you wish to take: \n"
           + "1. Terminate Audit Log read \n2. Reset Log");
-        String input = UserInput.getInstance(false).getNextInput();
+        String input = UserInput.getInstance().getNextInput();
 
         try {
             int i = Integer.parseInt(input.trim());
-            if(i == 1)
-                return;
-            else if(i == 2)
+            if (i == 2)
                 Files.delete(Paths.get(LOG_FILE_NAME));
             else {
-                UserInput.getInstance(false).sendOutput("Input not recognized.  Please try again.");
+                UserInput.getInstance().sendOutput("Input not recognized.  Please try again.");
                 logRecovery();
             }
         } catch (NumberFormatException e) {
-            UserInput.getInstance(false).sendOutput("Input not recognized.  Please try again.");
+            UserInput.getInstance().sendOutput("Input not recognized.  Please try again.");
             logRecovery();
         }
 

@@ -66,14 +66,14 @@ public class Login extends Command {
 
         if (entry.passwordHash == null) {
             // case 5 (first time login)
-            UserInput.getInstance(true).sendOutput("This is the first time the account is being used. You must create a new password. Passwords may contain 1-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.");
+            UserInput.getInstance().sendOutput("This is the first time the account is being used. You must create a new password. Passwords may contain 1-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.");
 
             String newPassword;
-            UserInput.getInstance(true).sendOutput("Enter a password: ");
-            newPassword = UserInput.getInstance(true).getNextInput();
-            UserInput.getInstance(true).sendOutput("Reenter the same password: ");
+            UserInput.getInstance().sendOutput("Enter a password: ");
+            newPassword = UserInput.getInstance().getNextPassword();
+            UserInput.getInstance().sendOutput("Reenter the same password: ");
 
-            if (newPassword.equals(UserInput.getInstance(true).getNextInput())) {
+            if (newPassword.equals(UserInput.getInstance().getNextPassword())) {
                 if (!isAlphanumeric(newPassword)) {
                     return "Password contains illegal characters";
                 } else if (passwordIsEasy(newPassword)) { // somehow check if password is too easy to guess
