@@ -7,8 +7,9 @@
  package com.AddressBook.Command;
 
  import com.AddressBook.AuditLog;
+ import com.AddressBook.User;
 
- import java.io.IOException;
+ import java.security.PrivateKey;
 
  public class DisplayAuditLog extends Command {
      @SuppressWarnings("FieldCanBeLocal")
@@ -19,15 +20,16 @@
      }
 
      @Override
-     public String execute() throws CommandException, IOException {
+     public String execute() throws Exception {
          String[] entries;
          AuditLog al = AuditLog.getInstance();
+         PrivateKey key = AuditLog.getPrivateKey(User.getInstance()::decrypt);
          if (input.equals("")) {
-             entries = al.getArray();
+             entries = al.getArray(key);
          } else {
              if (!validateInput(input, MAX_SIZE))
                  throw new CommandException("Invalid userID");
-             entries = al.getFilteredArray(input);
+             entries = al.getFilteredArray(input, key);
              if (entries.length == 0) {
                  throw new CommandException("Account does not exist");
              }

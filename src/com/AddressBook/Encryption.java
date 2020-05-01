@@ -16,6 +16,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -80,6 +81,19 @@ public class Encryption {
         return kp;
     }
 
+    /**
+     * this interface is used to provide a lambda to encrypt a string when calling
+     */
+    public interface Encrypter {
+        byte[] encrypt(String plainText) throws GeneralSecurityException, UnsupportedEncodingException;
+    }
+
+    /**
+     * this interface is used to provide a lambda to decrypt a string
+     */
+    public interface Decrypter {
+        String decrypt(byte[] encrypted) throws GeneralSecurityException, UnsupportedEncodingException;
+    }
 
 
     public static String decryptWithRSA(Key key, String encrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
@@ -95,9 +109,10 @@ public class Encryption {
         return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public static String keyToB64(Key k){
+    public static String keyToB64(Key k) {
         return Base64.getEncoder().encodeToString(k.getEncoded());
     }
+
     public static PrivateKey privateKeyFromB64(String b64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] bytes = Base64.getDecoder().decode(b64key);
         /* Generate private key. */
@@ -113,16 +128,6 @@ public class Encryption {
         return kf.generatePublic(ks);
     }
 
-    public static PrivateKey readPrivateKey(String filename, AddressDatabase.Decrypter decrypter) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-        /* Read all bytes from the private key file */
-        Path path = Paths.get(filename);
-        byte[] bytes = Files.readAllBytes(path);
-        /* Generate private key. */
-        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(bytes);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePrivate(ks);
-    }
-
     public static PublicKey readPublicKey(String filename) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         // from https://www.novixys.com/blog/how-to-generate-rsa-keys-java/
 
@@ -132,6 +137,12 @@ public class Encryption {
         X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePublic(ks);
+    }
+
+    public static void writePublicKey(String filename, PublicKey key) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        // from https://www.novixys.com/blog/how-to-generate-rsa-keys-java/
+        Path path = Paths.get(filename);
+        Files.write(path, key.getEncoded());;
     }
 
 
@@ -151,7 +162,7 @@ public class Encryption {
         int len = data.length();
         byte[] bytes = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(data.charAt(i), 16) << 4) + Character.digit(data.charAt(i+1), 16));
+            bytes[i / 2] = (byte) ((Character.digit(data.charAt(i), 16) << 4) + Character.digit(data.charAt(i + 1), 16));
         }
         return bytes;
     }

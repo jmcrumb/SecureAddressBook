@@ -21,6 +21,7 @@ import java.security.GeneralSecurityException;
 
 import com.AddressBook.User;
 import com.AddressBook.Database.AddressDatabase;
+import com.AddressBook.UserVisibleException;
 
 public class DeleteRecord extends Command {
 
@@ -52,7 +53,7 @@ public class DeleteRecord extends Command {
      * Command line: DER recordID
      */
     @Override
-    public String execute() throws CommandException, IOException, GeneralSecurityException {
+    public String execute() throws UserVisibleException, IOException, GeneralSecurityException {
         parseID(input);
         delete();
         return "OK";
@@ -70,7 +71,7 @@ public class DeleteRecord extends Command {
         recordID = arg.trim();
     }
 
-    private void delete() throws IOException, GeneralSecurityException {
+    private void delete() throws IOException, GeneralSecurityException, UserVisibleException {
         User usr = User.getInstance();
         AddressDatabase.getInstance().delete(usr.getUserId(), recordID,
           usr::decrypt, usr::encrypt);

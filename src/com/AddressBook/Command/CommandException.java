@@ -6,10 +6,12 @@
   * */
  package com.AddressBook.Command;
 
- public class CommandException extends Exception {
+ import com.AddressBook.UserVisibleException;
 
-   public CommandException(String s) {
-      super(s);
-   }
+ public class CommandException extends UserVisibleException {
+
+     public CommandException(String s) {
+         super(s);
+     }
  }
 

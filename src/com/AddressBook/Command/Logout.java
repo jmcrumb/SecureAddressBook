@@ -8,6 +8,9 @@
 
  import com.AddressBook.User;
 
+ import java.io.UnsupportedEncodingException;
+ import java.security.GeneralSecurityException;
+
  public class Logout extends Command {
      /**
       * Creates a Logout object
@@ -17,7 +20,7 @@
      }
 
      @Override
-     public String execute() throws CommandException {
+     public String execute() throws CommandException, GeneralSecurityException, UnsupportedEncodingException {
          if (User.getInstance().getAuthorization() < authRequirement) {
              throw new CommandException("No active login session");
          } else {

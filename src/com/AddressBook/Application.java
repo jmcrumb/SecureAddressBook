@@ -12,6 +12,8 @@ import com.AddressBook.Command.Command;
 import com.AddressBook.Command.CommandException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 
 public class Application {
 
@@ -62,11 +64,11 @@ public class Application {
         else
             throw new IllegalAccessError();
         userId = (User.getInstance().getUserId() == null) ? userId : User.getInstance().getUserId();
-//        AuditLog.getInstance().logCommand(command, isAuthorized, userId);
+        AuditLog.getInstance().logCommand(command, isAuthorized, userId);
         return s;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws GeneralSecurityException, UnsupportedEncodingException {
         //initialize system to a state of no user
         User.getInstance().setUser(null, null);
         //execute program
