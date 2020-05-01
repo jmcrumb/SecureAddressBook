@@ -273,6 +273,12 @@ public class AddressDatabase {
 
     }
 
+    public void reEncrypt(String userId, Encryption.Decrypter decrypterOld, Encryption.Encrypter encrypterNew) throws IOException, GeneralSecurityException {
+        instantiateMapIfNeeded(userId, decrypterOld);
+        setFileFromMap(userId, encrypterNew, map);
+    }
+
+
     public static AddressDatabase getInstance() {
         if (addressDatabase == null) {
             addressDatabase = new AddressDatabase();

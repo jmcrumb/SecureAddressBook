@@ -6,6 +6,8 @@
   * */
  package com.AddressBook.UserEntry;
 
+ import com.AddressBook.Encryption;
+
  public class UserEntry {
      final public String userId;
      final public String passwordHash;
@@ -81,4 +83,6 @@
      public void setFailedAttempts(int failedConsecutiveLogins) {
         this.failedConsecutiveLogins = failedConsecutiveLogins;
      }
+
+
  }

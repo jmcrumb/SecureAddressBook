@@ -12,6 +12,10 @@ public class User {
 
     private static User instance = null;
 
+    public UserEntry getEntry() {
+        return entry;
+    }
+
     private UserEntry entry;
     private String DBKey;
     private String decryptedPrivateKey;
@@ -60,6 +64,7 @@ public class User {
     public String sign(String data) throws Exception {
         return Encryption.encryptWithRSA(Encryption.privateKeyFromB64(decryptedPrivateKey), data);
     }
+
 
 
     public int getAuthorization() {

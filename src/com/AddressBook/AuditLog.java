@@ -26,6 +26,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.AddressBook.Encryption.*;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -75,9 +76,16 @@ public class AuditLog {
             this.signature = dataString.split(";")[1];
         }
 
-        EncryptedEntry(String encryptedData, String signature) {
-            this.encryptedData = encryptedData;
-            this.signature = signature;
+        EncryptedEntry(DataEntry de, EncryptedEntry lastEntry) throws Exception {
+            encryptedData = Encryption.encryptWithRSA(publicKey, de.toString());
+            String entryHash = Encryption.hashSHA256(de.toString());
+            signature = User.getInstance().sign(entryHash + ":" + lastEntry.signature);
+        }
+
+        EncryptedEntry(DataEntry de) throws Exception {
+            encryptedData = Encryption.encryptWithRSA(publicKey, de.toString());
+            String entryHash = Encryption.hashSHA256(de.toString());
+            signature = User.getInstance().sign(entryHash + ":");
         }
 
         @Override
@@ -220,19 +228,12 @@ public class AuditLog {
         EncryptedEntry newEntry = null;
         List<String> entryStringList = fileToList();
         EncryptedEntry lastEntry;
-
-        String encryptedData = Encryption.encryptWithRSA(publicKey, data.toString());
-        String entryHash = Encryption.hashSHA256(data.toString());
-
-        String signature;
         if (entryStringList.size() > 0) {
             lastEntry = new EncryptedEntry(entryStringList.get(entryStringList.size() - 1));
-            signature = User.getInstance().sign(entryHash + ":" + lastEntry.signature);
-
+            newEntry = new EncryptedEntry(data, lastEntry);
         } else {
-            signature = User.getInstance().sign(entryHash + ":");
+            newEntry = new EncryptedEntry(data);
         }
-        newEntry = new EncryptedEntry(encryptedData, signature);
 
         entryStringList.add(newEntry.toString());
         listToFile(entryStringList);
@@ -252,6 +253,27 @@ public class AuditLog {
           .stream()
           .map(DataEntry::toString)
           .toArray(String[]::new);
+    }
+
+    public void reEncryptEntries(Decrypter decrypter, Encrypter encrypter) throws Exception {
+        PrivateKey pk = getPrivateKey(decrypter);
+        setPrivateKey(pk, encrypter);
+
+        List<DataEntry> ls = decryptEntries(pk);
+        List<EncryptedEntry> le = new LinkedList<>();
+        EncryptedEntry lastEntry = null;
+        for (DataEntry entry : ls) {
+            EncryptedEntry newEntry;
+            if (ls.size() > 0) {
+                newEntry = new EncryptedEntry(entry);
+            } else {
+                newEntry = (new EncryptedEntry(entry, lastEntry));
+            }
+            le.add(newEntry);
+            lastEntry = newEntry;
+        }
+        listToFile(le.stream().map(EncryptedEntry::toString).collect(Collectors.toList()));
+
     }
 
 }

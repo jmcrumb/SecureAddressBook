@@ -6,17 +6,21 @@
  * */
 package com.AddressBook.Command;
 
+import com.AddressBook.AuditLog;
+import com.AddressBook.Database.AddressDatabase;
 import com.AddressBook.Database.UserDatabase;
 import com.AddressBook.Encryption;
 import com.AddressBook.User;
+import com.AddressBook.UserEntry.AdminEntry;
 import com.AddressBook.UserEntry.UserEntry;
 import com.AddressBook.UserInput;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
+import static com.AddressBook.Encryption.*;
 
 public class ChangePassword extends Command {
 
@@ -33,7 +37,7 @@ public class ChangePassword extends Command {
     }
 
     @Override
-    public String execute() throws IOException {
+    public String execute() throws Exception {
         if (User.getInstance().getUserId() == null) {
             return "No active login session";
         }
@@ -64,9 +68,29 @@ public class ChangePassword extends Command {
         }
 
         newPassword = Encryption.hashBCrypt(newPassword);
-        UserEntry updatedEntry = new UserEntry(User.getInstance().getUserId(), newPassword);
+        String hashedPass = Encryption.hashSHA256(newPassword);
+
+
+        User user = User.getInstance();
+        UserEntry oldEntry = user.getEntry();
+        //re-encrypt private key
+        byte[] b = stringToBytes(oldEntry.encryptedPrivateKey);
+        String b64PrivateKey = user.decrypt(b);
+        b = encrypt(b64PrivateKey, hashedPass);
+        String encryptedPriv = bytesToString(b);
+
+        //re-encrypt database
+        AddressDatabase.getInstance().reEncrypt(user.getUserId(), user::decrypt, s -> encrypt(s, hashedPass));
+
+        UserEntry updatedEntry = new UserEntry(oldEntry.userId, newPassword, encryptedPriv, oldEntry.publicKey);
         UserDatabase.getInstance().set(updatedEntry);
-        User.getInstance().setUser(updatedEntry, newPassword);
+
+        if (updatedEntry.userId.equals("admin")) {
+            updatedEntry = new AdminEntry(updatedEntry);
+            AuditLog.getInstance().reEncryptEntries(user::decrypt, s -> encrypt(s, hashedPass));
+        }
+
+        User.getInstance().setUser(updatedEntry, hashedPass);
 
         return "OK";
     }
