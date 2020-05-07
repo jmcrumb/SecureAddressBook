@@ -64,7 +64,7 @@ public class Application {
         return s;
     }
 
-    public static void main(String[] args) {
+    public static void mai(String[] args) {
         //initialize system to a state of no user
         User.getInstance().setUser(null, null);
         //execute program

@@ -1,0 +1,7 @@
+Per user log files
+    Encryption key known by user
+    Decryption key known by admin
+
+Default user
+    Plaintext log
+
