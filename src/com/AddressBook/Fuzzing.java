@@ -3,6 +3,7 @@ package com.AddressBook;
 import java.util.HashMap;
 import java.util.Random;
 import java.awt.Robot;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.awt.AWTException;
@@ -14,7 +15,7 @@ public class Fuzzing {
     public static Random rand;
     public static Output out = null;
     public static final String ADMIN_PASSWORD = "wordpass";
-    public static final String LOG_FILEPATH = "fuzzlog.csv";
+    public static final String LOG_FILEPATH = "FuzzFiles/fuzzlogs/fuzzlog.csv";
     public static FileWriter log;
 
     private class Output {
@@ -52,7 +53,7 @@ public class Fuzzing {
         try {
             log = new FileWriter(LOG_FILEPATH);
             out = new Output(50);
-            
+            startup();
             //testing
             lin();
             for(int userPopulation = 0; userPopulation < 10; userPopulation++) {
@@ -76,6 +77,11 @@ public class Fuzzing {
                 e.printStackTrace();
             }
         }
+    }
+
+    //starts up the addressbook application
+    public static void startup() {
+        out.enterString("java Application", 0);
     }
 
     //Get userID's that already exists in the address book
@@ -519,7 +525,34 @@ public class Fuzzing {
     }
 
     public static void imd() {
-        
+        test("IMD notloggedin", "No active login session");
+        loginUser();
+        test("IMD", "Invalid input");
+        test("IMD" + getInvalidInput(1, 24), "Invalid input");
+        test("IMD ~/" + getValidInput(1, 24) +"/"+getValidInput(1, 24), "Input file invalid format");
+        randomNoiseFile("FuzzFiles/testfiles/randomdatabase.csv");
+        test("IMD FuzzFiles/testfiles/emptydatabase.csv", "Invalid file");
+        test("IMD FuzzFiles/testfiles/randomdatabase.csv", "Invalid file");
+        //TODO: populate corruptdatabase file with modified database export
+        test("IMD FuzzFiles/testfiles/corruptdatabase.csv", "Invalid file");
+        //TODO: populate corruptdatabase file with valid database export
+        test("IMD FuzzFiles/testfiles/gooddatabase.csv", "OK");
+        logout();
+        loginAdmin();
+        //TODO: populate corruptdatabase file with modified database export
+        test("IMD FuzzFiles/testfiles/gooddatabase.csv", "User not authorized");
+        logout();
+    }
+
+    public static void randomNoiseFile(String filepath) {
+        byte[] barr = new byte[getRandom(64, 1024)];
+        rand.nextBytes(barr);
+        try (FileOutputStream stream = new FileOutputStream(filepath)) {
+            stream.write(barr);
+            stream.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void exd() {
@@ -527,11 +560,42 @@ public class Fuzzing {
     }
 
     public static void ext() {
-        
+        test("EXT", "OK");
+        startup();
+        loginUser();
+        test("EXT", "OK");
+        startup();
+        loginAdmin();
+        test("EXT", "OK");
+        startup();
+        test("EXT " + getValidInput(1, 24), "OK");
+        startup();
     }
     
     public static void hlp() {
-        
+        hlpHelper();
+        loginAdmin();
+        hlpHelper();
+        logout();
+        loginUser();
+        hlpHelper();
+        logout();
+    }
+
+    public static void hlpHelper() {
+        String[] commands = {
+            "LIN", "LOU", "CHP", "ADU", "DEU", "DAL", "ADR", "DER", "EDR", "RER", "IMD", "EXD", "EXT", "HLP"
+        };
+
+        test("HLP " + getValidInput(1, 24), "Unrecognized command");
+        test("HLP " + getInvalidInput(1, 24), "Invalid input");
+        test("HLP " + commands[getRandom(0, 15)], "OK");
+        test("HLP " + commands[getRandom(0, 15)] + " " + getValidInput(1, 24), "OK");
+        String s = "";
+        for(int i = 0; i < getRandom(2, 15); i++) {
+            s += commands[getRandom(0, 15)] + " ";
+        }
+        test("HLP " + s, "OK");
     }
 
     public static void test(String fullInput, String expectedOutput)
