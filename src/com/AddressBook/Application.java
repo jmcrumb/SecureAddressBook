@@ -26,10 +26,16 @@ public class Application {
         while (true) {
             try {
                 ui.sendResponse(processInput(ui));
-            } catch (CommandException | IOException ce) {
+            } catch (CommandException ce){
                 //TODO: Delete NEXT LINE once debugging is over
-                System.out.println("***CommandException | IOException***");
+                System.out.println("***CommandException***");
                 ui.sendResponse(ce.getMessage());
+                ce.printStackTrace();
+            }
+            catch(IOException ioe) {
+                //TODO: Delete NEXT LINE once debugging is over
+                System.out.println("***IOException***");
+                ioe.printStackTrace();
             } catch (IllegalAccessError ae) {
                 ui.sendResponse("The current user is not authorized");
             } catch (Exception e) {
@@ -64,7 +70,7 @@ public class Application {
         return s;
     }
 
-    public static void mai(String[] args) {
+    public static void main(String[] args) {
         //initialize system to a state of no user
         User.getInstance().setUser(null, null);
         //execute program

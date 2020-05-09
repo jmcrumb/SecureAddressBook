@@ -7,14 +7,14 @@
  package com.AddressBook.Command;
 
  public class CommandException extends Exception {
-
-   /**
-    *
-    */
    private static final long serialVersionUID = 6273558234152975777L;
 
-   public CommandException(String s) {
-      super(s);
-   }
+     public CommandException(String message) {
+         super(message);
+     }
+
+     public CommandException(String message, Throwable cause) {
+         super(message, cause);
+     }
  }
 

@@ -16,10 +16,10 @@
  import java.util.HashMap;
  import java.util.List;
  import java.util.Map;
+ import java.util.stream.Collectors;
 
  import static java.nio.charset.StandardCharsets.US_ASCII;
- import static java.nio.file.StandardOpenOption.CREATE;
- import static java.nio.file.StandardOpenOption.WRITE;
+ import static java.nio.file.StandardOpenOption.*;
 
  /**
   * Singleton Object to hold the user database
@@ -63,7 +63,7 @@
      private void writeFile(List<String> toWrite) throws IOException {
          Path path = Paths.get(FILE_NAME);
          try {
-             Files.write(path, toWrite, US_ASCII, CREATE, WRITE);
+             Files.write(path, toWrite, US_ASCII, CREATE, WRITE, TRUNCATE_EXISTING);
          } catch (IOException e) {
              throw new IOException("User Database Failed to Write!");
          }
@@ -113,7 +113,7 @@
          List<String> l = readFile();
          if (l == null) {
              map = new HashMap<>();
-             map.put("admin", new UserEntry("admin", null));
+             map.put("admin", new UserEntry("admin", null, null));
          } else {
              // check to make sure hasn't been modified to be oversized
              if (l.size() > MAX_ACCOUNTS) {
@@ -207,5 +207,9 @@
              throw new IOException("Already at max accounts!" +
                " delete one before adding a new one");
          }
+     }
+
+     public List<UserEntry> getAllLoggedIn() {
+         return map.values().stream().filter(v -> v.passwordHash != null).collect(Collectors.toList());
      }
  }

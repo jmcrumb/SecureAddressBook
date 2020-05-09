@@ -6,6 +6,7 @@
  * */
 package com.AddressBook.Command;
 
+import com.AddressBook.AuditLog;
 import com.AddressBook.Database.UserDatabase;
 import com.AddressBook.Encryption;
 import com.AddressBook.User;
@@ -14,7 +15,10 @@ import com.AddressBook.UserEntry.UserEntry;
 import com.AddressBook.UserInput;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,7 +36,7 @@ public class Login extends Command {
         return true;
     }
 
-    public String execute() throws CommandException, IOException {
+    public String execute() throws CommandException, IOException, GeneralSecurityException {
         // case 1 (user already logged in)
         if (User.getInstance().getUserId() != null) {
             return "An account is currently active; logout before proceeding";
@@ -41,15 +45,15 @@ public class Login extends Command {
         if (input.equals("")) {
             throw new CommandException("A username and password must be provided.");
         }
-        String userid = input;
+        String userId = input;
 
         UserDatabase database = UserDatabase.getInstance();
 
         // case 2 (user doesn't exist)
-        if (!database.exists(userid)) return "Invalid Credentials";
+        if (!database.exists(userId)) return "Invalid Credentials";
 
 
-        UserEntry entry = database.get(userid);
+        UserEntry entry = database.get(userId);
 
         if (!loginGuard(entry)) {
             throw new CommandException("Too many password attempts on this account.  Please try again later.");
@@ -77,13 +81,30 @@ public class Login extends Command {
             } else {
                 return "Passwords do not match";
             }
-            entry = new UserEntry(userid, Encryption.hashBCrypt(password));
+            AuditLog log = AuditLog.getInstance();
+            // get new RSA keys
+            KeyPair kp = Encryption.generatePublicPrivateKeys();
+            //encode key to base64
+            String encoded = Encryption.keyToB64(kp.getPublic());
+            //encrypt PublicKey
+            String encrypted = Base64.getEncoder().encodeToString(Encryption.encrypt(encoded, Encryption.hashSHA256(password)));
+
+            entry = new UserEntry(userId, Encryption.hashBCrypt(password), encrypted);
             database.set(entry);
-            if (entry.userId.equals("admin")) entry = new AdminEntry(entry);
-            try {
-                User.getInstance().setUser(entry, Encryption.hashSHA256(password));
-            } catch (Exception e) {
-                throw new CommandException("Unknown Error.");
+            if (entry.userId.equals("admin")) {
+                entry = new AdminEntry(entry);
+            }
+
+            User user = User.getInstance();
+            user.setUser(entry, Encryption.hashSHA256(password));
+            if (entry.userId.equals("admin")) {
+                log.onAdminFirstLogin(user::encrypt);
+                //add user private key for decoding log
+                log.onUserFirstLogin(userId, kp.getPrivate());
+                log.onAdminLogin(user::decrypt, user::encrypt);
+            }else {
+                //add user private key for decoding log
+                log.onUserFirstLogin(userId, kp.getPrivate());
             }
         } else {
             UserInput.getInstance().sendOutput("Enter your password: ");
@@ -96,11 +117,13 @@ public class Login extends Command {
                 // case 4 (correct username and password)
                 entry.setFailedAttempts(0);
                 if (entry.userId.equals("admin")) entry = new AdminEntry(entry);
-                try {
-                    User.getInstance().setUser(entry, Encryption.hashSHA256(password));
-                } catch (Exception e) {
-                    throw new CommandException("Unknown Error.");
+
+                User user = User.getInstance();
+                user.setUser(entry, Encryption.hashSHA256(password));
+                if (entry.userId.equals("admin")) {
+                    AuditLog.getInstance().onAdminLogin(user::decrypt, user::encrypt);
                 }
+
             }
         }
 
