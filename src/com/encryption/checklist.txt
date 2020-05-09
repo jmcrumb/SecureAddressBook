@@ -5,3 +5,34 @@ Per user log files
 Default user
     Plaintext log
 
+
+
+AuditLogClass
+    for files
+        USER LOGS
+            .log/<userid>/entries.log = the entries
+            .log/<userid>/keys.log = the keyfile
+            .log/nouser/entries.log = file for when no user signed in
+        Admin stuff
+            .log/admin/<userid>.key = the rsa key for each user, encrypted with admin encrypter
+            .log/admin/
+
+when user is created
+    create keypair and save public with user, save private in .log/admin/<userid>.key
+    create .log/<userid>/entries.log and .log/<userid>/keys.log
+
+to read user log
+    access private key of user who's log it is
+    decrypt all keys for every log entry
+    use those keys to undo AES encryption of entries
+to save user log
+    create random AES encryption key
+    encrypt key with RSA and store in keyfile for user
+
+
+
+
+
+- can read all user record
+- can get private keys for each user decrypted using admin user decrypter function
+- can get
