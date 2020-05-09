@@ -16,8 +16,7 @@
  import java.nio.file.Paths;
  import java.security.GeneralSecurityException;
 
- import static java.nio.file.StandardOpenOption.CREATE_NEW;
- import static java.nio.file.StandardOpenOption.WRITE;
+ import static java.nio.file.StandardOpenOption.*;
 
  public class ExportDatabase extends Command {
 
@@ -69,7 +68,7 @@
      }
 
      private void writeToFile(Path p, String data) throws IOException {
-         Files.writeString(p, data, CREATE_NEW, WRITE);
+         Files.writeString(p, data, CREATE, WRITE);
      }
 
 

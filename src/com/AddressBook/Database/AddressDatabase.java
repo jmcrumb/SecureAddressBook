@@ -10,7 +10,6 @@ import com.AddressBook.AddressEntry;
 import com.AddressBook.Encryption;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,21 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AddressDatabase {
-    /**
-     * this interface is used to provide a lambda to encrypt a string when calling
-     * {@link #set}
-     */
-    public interface Encrypter {
-        byte[] encrypt(String plainText) throws GeneralSecurityException, UnsupportedEncodingException;
-    }
-
-    /**
-     * this interface is used to provide a lambda to decrypt a string when calling
-     * {@link #set}, {@link #get}, {@link #exists} and {@link #isFull}
-     */
-    public interface Decrypter {
-        String decrypt(byte[] encrypted) throws GeneralSecurityException, UnsupportedEncodingException;
-    }
 
     /**
      * The maximum number of records a single user can have
@@ -90,7 +74,7 @@ public class AddressDatabase {
     private void writeFile(String userId, byte[] data) throws IOException {
         Path path = Paths.get(FOLDER_NAME, FILE_PREFIX + userId);
         try {
-            if(Files.notExists(Paths.get(FOLDER_NAME)))
+            if (Files.notExists(Paths.get(FOLDER_NAME)))
                 Files.createDirectory(Paths.get(FOLDER_NAME));
             Files.write(path, data);
             // Files.writeString(path, data, UTF_8, CREATE, WRITE);
@@ -106,7 +90,7 @@ public class AddressDatabase {
      * @return map of the data loaded from the file
      * @throws IOException if fails to read file or misformatted
      */
-    private Map<String, AddressEntry> getMapFromFile(String userId, Decrypter decrypter)
+    private Map<String, AddressEntry> getMapFromFile(String userId, Encryption.Decrypter decrypter)
       throws IOException, GeneralSecurityException {
         byte[] encypted = readFile(userId);
         if (encypted == null) {
@@ -144,7 +128,7 @@ public class AddressDatabase {
      * @param m         the map of data to store in the file
      * @throws IOException if fails to write
      */
-    private void setFileFromMap(String userId, Encrypter encrypter, Map<String, AddressEntry> m)
+    private void setFileFromMap(String userId, Encryption.Encrypter encrypter, Map<String, AddressEntry> m)
       throws IOException, GeneralSecurityException {
         StringBuilder sb = new StringBuilder();
         m.forEach((k, v) -> {
@@ -158,7 +142,7 @@ public class AddressDatabase {
      * @param decrypter function to decrypt the data
      * @throws IOException if fails to read db file
      */
-    private void instantiateMapIfNeeded(String userId, Decrypter decrypter)
+    private void instantiateMapIfNeeded(String userId, Encryption.Decrypter decrypter)
       throws IOException, GeneralSecurityException {
         if (map == null || currentUserId == null || !currentUserId.equals(userId)) {
             map = getMapFromFile(userId, decrypter);
@@ -176,7 +160,7 @@ public class AddressDatabase {
      * @throws IOException if database fails to load from file
      */
 
-    public AddressEntry get(String userId, String recordId, Decrypter decrypter)
+    public AddressEntry get(String userId, String recordId, Encryption.Decrypter decrypter)
       throws IOException, GeneralSecurityException {
 
         instantiateMapIfNeeded(userId, decrypter);
@@ -191,7 +175,7 @@ public class AddressDatabase {
      * @throws IOException              on failure to load or store database file
      * @throws GeneralSecurityException if encryption fails
      */
-    public void delete(String userId, String recordId, Decrypter decrypter, Encrypter encrypter)
+    public void delete(String userId, String recordId, Encryption.Decrypter decrypter, Encryption.Encrypter encrypter)
       throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         if (!map.containsKey(recordId)) {
@@ -215,7 +199,7 @@ public class AddressDatabase {
      * @param encrypter function to encrypt records
      * @throws IOException if database fails to load from file or save to file
      */
-    public void set(String userId, AddressEntry entry, Decrypter decrypter, Encrypter encrypter)
+    public void set(String userId, AddressEntry entry, Encryption.Decrypter decrypter, Encryption.Encrypter encrypter)
       throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         if (!isFull(userId, decrypter) || map.containsKey(entry.recordID)) {
@@ -234,7 +218,7 @@ public class AddressDatabase {
      * @return if the record exists
      * @throws IOException if database fails to load from file
      */
-    public boolean exists(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+    public boolean exists(String userId, Encryption.Decrypter decrypter) throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         return map.containsKey(userId);
     }
@@ -247,7 +231,7 @@ public class AddressDatabase {
      * @return if the database is full
      * @throws IOException if fails to read db file
      */
-    public boolean isFull(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+    public boolean isFull(String userId, Encryption.Decrypter decrypter) throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         return !(map.size() < MAX_RECORDS);
     }
@@ -260,7 +244,7 @@ public class AddressDatabase {
      * @return CSV string of user's database
      * @throws IOException if failed to read db file
      */
-    public String exportDB(String userId, Decrypter decrypter) throws IOException, GeneralSecurityException {
+    public String exportDB(String userId, Encryption.Decrypter decrypter) throws IOException, GeneralSecurityException {
         byte[] raw = readFile(userId);
         return decrypter.decrypt(raw);
     }
@@ -273,7 +257,7 @@ public class AddressDatabase {
      * @param data      CSV data to add
      * @throws IOException if fails to read or write db file
      */
-    public void importDB(String userId, Decrypter decrypter, Encrypter encrypter, String data)
+    public void importDB(String userId, Encryption.Decrypter decrypter, Encryption.Encrypter encrypter, String data)
       throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypter);
         Map<String, AddressEntry> m = getMapFromString(data);
@@ -293,7 +277,7 @@ public class AddressDatabase {
         return addressDatabase;
     }
 
-    public void reEncrypt(String userId, Decrypter decrypterOld, Encrypter encrypterNew) throws IOException, GeneralSecurityException {
+    public void reEncrypt(String userId, Encryption.Decrypter decrypterOld, Encryption.Encrypter encrypterNew) throws IOException, GeneralSecurityException {
         instantiateMapIfNeeded(userId, decrypterOld);
         setFileFromMap(userId, encrypterNew, map);
     }

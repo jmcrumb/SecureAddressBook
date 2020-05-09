@@ -8,6 +8,11 @@ package com.AddressBook;
 
 import com.AddressBook.UserEntry.*;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.util.Base64;
+
 public class User {
 
     private static User instance = null;
@@ -41,14 +46,14 @@ public class User {
     }
 
 
-    public byte[] encrypt(String data) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
+    public byte[] encrypt(String data) throws java.security.GeneralSecurityException {
         if (DBKey == null || entry == null) {
             throw new RuntimeException("User is not initialized.");
         }
         return Encryption.encrypt(data, DBKey);
     }
 
-    public String decrypt(byte[] data) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
+    public String decrypt(byte[] data) throws java.security.GeneralSecurityException  {
         if (DBKey == null || entry == null) {
             throw new RuntimeException("User is not initialized.");
         }
@@ -60,5 +65,11 @@ public class User {
         if (entry == null) return 0;
         else if (entry instanceof AdminEntry) return 2;
         else return 1;
+    }
+
+    public PublicKey getPublicKey() throws GeneralSecurityException, UnsupportedEncodingException {
+        byte[] b = Base64.getDecoder().decode(entry.encryptedPublicKey);
+        String k = decrypt(b);
+        return Encryption.publicKeyFromB64(k);
     }
 }

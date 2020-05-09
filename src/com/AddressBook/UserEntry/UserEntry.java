@@ -9,13 +9,15 @@
  public class UserEntry {
      final public String userId;
      final public String passwordHash;
+     final public String encryptedPublicKey;
      private long timeStamp;
      private int failedConsecutiveLogins;
 
 
-     public UserEntry(String userId, String passwordHash) {
+     public UserEntry(String userId, String passwordHash, String encryptedPublicKey) {
          this.userId = userId;
          this.passwordHash = passwordHash;
+         this.encryptedPublicKey = encryptedPublicKey;
          timeStamp = System.currentTimeMillis();
          failedConsecutiveLogins = 0;
      }
@@ -23,6 +25,9 @@
      protected UserEntry(UserEntry ue) {
          this.userId = ue.userId;
          this.passwordHash = ue.passwordHash;
+         this.timeStamp = ue.timeStamp;
+         this.failedConsecutiveLogins = ue.failedConsecutiveLogins;
+         this.encryptedPublicKey = ue.encryptedPublicKey;
      }
 
      public UserEntry(String userEntryString) {
@@ -35,6 +40,7 @@
              this.passwordHash = ((fields[1].equals("none")) ? null : fields[1]);
              this.failedConsecutiveLogins = Integer.parseInt(fields[3]);
              this.timeStamp = Long.parseLong(fields[2], 10);
+             this.encryptedPublicKey = fields[3];
          }
      }
 

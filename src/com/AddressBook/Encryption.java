@@ -27,12 +27,21 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
+
 public class Encryption {
 
+    ///-----------------BCRYPT-----------------
+
     public static String hashBCrypt(String data) {
-        String hashedData = BCrypt.hashpw(data, BCrypt.gensalt());
-        return hashedData;
+        return BCrypt.hashpw(data, BCrypt.gensalt());
     }
+
+    public static boolean checkBCrypt(String unhashed, String hashed) {
+        return BCrypt.checkpw(unhashed, hashed);
+    }
+
+
+    ///-----------------SHA256-----------------
 
     public static String hashSHA256(String data) throws java.security.NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -41,61 +50,18 @@ public class Encryption {
         return Base64.getEncoder().encodeToString(hash);
     }
 
-    public static boolean checkBCrypt(String unhashed, String hashed) {
-        return BCrypt.checkpw(unhashed, hashed);
-    }
 
-    public static byte[] encrypt(String data, String key) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
-        byte[] encodeKey = Base64.getDecoder().decode(key.getBytes(StandardCharsets.UTF_8));
-        encodeKey = Arrays.copyOf(encodeKey, 16);
-        SecretKeySpec aesKey = new SecretKeySpec(encodeKey, "AES");
-
-        Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
-
-        aes.init(Cipher.ENCRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
-        byte[] cipherText = aes.doFinal(data.getBytes(StandardCharsets.UTF_8));
-
-        return cipherText;
-    }
-
-    public static String decrypt(byte[] data, String key) throws java.security.GeneralSecurityException, java.io.UnsupportedEncodingException {
-        byte[] decodeKey = Base64.getDecoder().decode(key.getBytes(StandardCharsets.UTF_8));
-        decodeKey = Arrays.copyOf(decodeKey, 16);
-        SecretKeySpec aesKey = new SecretKeySpec(decodeKey, "AES");
-
-        Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
-
-        aes.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
-        byte[] plainText = aes.doFinal(data);
-
-        return new String(plainText, StandardCharsets.UTF_8);
-    }
-
+    ///-----------------KEYS-----------------
 
     public static KeyPair generatePublicPrivateKeys() throws NoSuchAlgorithmException {
         // from https://www.novixys.com/blog/how-to-generate-rsa-keys-java/
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(2048);
-        KeyPair kp = kpg.generateKeyPair();
-        return kp;
-
+        // takes a while to generate but oh well...
+        kpg.initialize(4096);
+        return kpg.generateKeyPair();
     }
 
-    public static String decryptWithRSA(PublicKey key, String encrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] bytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
-
-
-    public static String encryptWithRSA(PrivateKey key, String data) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes(StandardCharsets.UTF_8)));
-    }
-
-    public static PrivateKey readPrivateKey(String filename, AddressDatabase.Decrypter decrypter) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public static PrivateKey readPrivateKey(String filename, Decrypter decrypter) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         /* Read all bytes from the private key file */
         Path path = Paths.get(filename);
         byte[] bytes = Files.readAllBytes(path);
@@ -116,4 +82,81 @@ public class Encryption {
     }
 
 
+    public static String keyToB64(Key k) {
+        return Base64.getEncoder().encodeToString(k.getEncoded());
+    }
+
+    public static PrivateKey privateKeyFromB64(String b64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] bytes = Base64.getDecoder().decode(b64key);
+        /* Generate private key. */
+        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(bytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePrivate(ks);
+    }
+
+    public static PublicKey publicKeyFromB64(String b64key) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        byte[] bytes = Base64.getDecoder().decode(b64key);
+        X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(ks);
+    }
+
+
+    ///-----------------AES-----------------
+    /**
+     * this interface is used to provide a lambda to encrypt a string when calling
+     */
+    public interface Encrypter {
+        byte[] encrypt(String plainText) throws GeneralSecurityException;
+    }
+    /**
+     * this interface is used to provide a lambda to decrypt a string when calling
+     */
+    public interface Decrypter {
+        String decrypt(byte[] encrypted) throws GeneralSecurityException;
+    }
+
+
+    public static byte[] encrypt(String data, String key) throws java.security.GeneralSecurityException {
+        byte[] encodeKey = Base64.getDecoder().decode(key.getBytes(StandardCharsets.UTF_8));
+        encodeKey = Arrays.copyOf(encodeKey, 16);
+        SecretKeySpec aesKey = new SecretKeySpec(encodeKey, "AES");
+
+        Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+
+        aes.init(Cipher.ENCRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
+        byte[] cipherText = aes.doFinal(data.getBytes(StandardCharsets.UTF_8));
+
+        return cipherText;
+    }
+
+    public static String decrypt(byte[] data, String key) throws java.security.GeneralSecurityException{
+        byte[] decodeKey = Base64.getDecoder().decode(key.getBytes(StandardCharsets.UTF_8));
+        decodeKey = Arrays.copyOf(decodeKey, 16);
+        SecretKeySpec aesKey = new SecretKeySpec(decodeKey, "AES");
+
+        Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+
+        aes.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(new byte[16]));
+        byte[] plainText = aes.doFinal(data);
+
+        return new String(plainText, StandardCharsets.UTF_8);
+    }
+
+
+    ///-----------------RSA-----------------
+
+    public static String encryptWithRSA(Key key, String data) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    public static String decryptWithRSA(Key key, String encrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] bytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
 }
+

@@ -7,8 +7,14 @@
 package com.AddressBook.Command;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 
+import com.AddressBook.AuditLog;
 import com.AddressBook.Database.UserDatabase;
+import com.AddressBook.Encryption;
+import com.AddressBook.User;
 import com.AddressBook.UserEntry.UserEntry;
 
  public class AddUser extends Command{
@@ -33,14 +39,14 @@ import com.AddressBook.UserEntry.UserEntry;
      * @throws CommandException
      */
     @Override
-    public String execute() throws CommandException, IOException {
+    public String execute() throws CommandException, IOException, GeneralSecurityException {
         if(!validateInput(userID, MAX_SIZE))
             throw new CommandException("Invalid userID");
         else if(UserDatabase.getInstance().get(userID) != null)
             throw new CommandException("Account already exists");
         else {
             //Creates a new user associated with the userID
-            UserDatabase.getInstance().set(new UserEntry(userID, null));
+            UserDatabase.getInstance().set(new UserEntry(userID, null, null));
             return "OK";
         }
     }

@@ -15,10 +15,10 @@ import com.AddressBook.UserInput;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.security.PublicKey;
+import java.util.*;
+
+import static com.AddressBook.Encryption.keyToB64;
 
 public class ChangePassword extends Command {
 
@@ -66,8 +66,11 @@ public class ChangePassword extends Command {
         }
         final String hashedPassword = Encryption.hashSHA256(newPassword);
         String bPassword = Encryption.hashBCrypt(newPassword);
+        PublicKey pk = User.getInstance().getPublicKey();
+        String encoded = keyToB64(pk);
+        String encryptedKey = Base64.getEncoder().encodeToString(Encryption.encrypt(encoded, hashedPassword));
        
-        UserEntry updatedEntry = new UserEntry(User.getInstance().getUserId(), bPassword);
+        UserEntry updatedEntry = new UserEntry(User.getInstance().getUserId(), bPassword, encryptedKey);
         AddressDatabase.getInstance().reEncrypt(User.getInstance().getUserId(), User.getInstance()::decrypt, s->Encryption.encrypt(s, hashedPassword));
         UserDatabase.getInstance().set(updatedEntry);
         User.getInstance().setUser(updatedEntry, hashedPassword);
