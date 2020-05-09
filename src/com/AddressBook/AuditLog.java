@@ -70,11 +70,12 @@ to save user log
          DataHolder(String dataString) {
              String[] sa = dataString.split(", ");
              this.date = LocalDate.parse(sa[0], DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
-             this.time = LocalTime.parse(sa[1], DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
+             this.time = LocalTime.parse(sa[1], timeFormater);
              this.commandType = sa[2];
              this.userId = sa[3];
          }
 
+         final DateTimeFormatter timeFormater = DateTimeFormatter.ofPattern("HH:mm:ss");
          final LocalDate date;
          final LocalTime time;
 
@@ -84,7 +85,7 @@ to save user log
          @Override
          public String toString() {
              return this.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) + ", " +
-               this.time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) + ", " +
+               this.time.format(timeFormater) + ", " +
                this.commandType + ", " +
                this.userId;
          }
@@ -148,6 +149,7 @@ to save user log
 
      // used when admin logs in to add all public keys from users who had a first login
      private void updateUserPrivateKeys(Encryption.Decrypter adminDecrypter, Encryption.Encrypter adminEncrypter) throws IOException, GeneralSecurityException {
+         if (!Files.exists(TEMP_KEY_FILE)) return;
          PrivateKey tempKey = getTempPrivateKey(adminDecrypter);
          List<String> lines = Files.readAllLines(TEMP_KEY_FILE);
          for (String line : lines) {
@@ -356,20 +358,23 @@ to save user log
          // decrypt those entries
          List<String> entries = decryptEntries(encryptedEntries, keys);
          // turn entries into objects
-         List<DataHolder> r = entries.stream().map(DataHolder::new).collect(Collectors.toList());
-         Collections.sort(r);
+         List<DataHolder> r = entries.stream().map(DataHolder::new).sorted().collect(Collectors.toList());
          return r;
      }
 
      public List<DataHolder> getLogOfNoUser() throws IOException {
-         return Files.readAllLines(NO_USER_ENTRIES)
-           .stream()
-           .map(DataHolder::new)
-           .collect(Collectors.toList());
+         if (Files.exists(NO_USER_ENTRIES)) {
+             return Files.readAllLines(NO_USER_ENTRIES)
+               .stream()
+               .map(DataHolder::new)
+               .collect(Collectors.toList());
+         } else {
+             return new ArrayList<>();
+         }
      }
 
      public List<DataHolder> getAllLogs(Encryption.Decrypter adminDecrypter) throws IOException, GeneralSecurityException {
-         List<UserEntry> users = UserDatabase.getInstance().getAll();
+         List<UserEntry> users = UserDatabase.getInstance().getAllLoggedIn();
          List<DataHolder> total = new ArrayList<>();
          for (UserEntry u : users) {
              total.addAll(getLogOfUser(u.userId, adminDecrypter));

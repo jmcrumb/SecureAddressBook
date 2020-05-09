@@ -6,6 +6,8 @@
   * */
  package com.AddressBook.UserEntry;
 
+ import java.util.Arrays;
+
  public class UserEntry {
      final public String userId;
      final public String passwordHash;
@@ -32,15 +34,14 @@
 
      public UserEntry(String userEntryString) {
          String[] fields = userEntryString.split(";");
-         if (fields.length != 4) {
+         if (fields.length != 5) {
              throw new RuntimeException("invalid user entry string \n");
-
          } else {
              this.userId = fields[0];
              this.passwordHash = ((fields[1].equals("none")) ? null : fields[1]);
              this.failedConsecutiveLogins = Integer.parseInt(fields[3]);
              this.timeStamp = Long.parseLong(fields[2], 10);
-             this.encryptedPublicKey = fields[3];
+             this.encryptedPublicKey = fields[4];
          }
      }
 
@@ -50,7 +51,7 @@
 
      public String toString() {
          return this.userId + ";" + ((this.passwordHash == null) ? "none" : this.passwordHash)
-            + ";" + this.timeStamp + ";" + this.failedConsecutiveLogins;
+            + ";" + this.timeStamp + ";" + this.failedConsecutiveLogins + ";" + this.encryptedPublicKey;
      }
 
      public boolean hasLoggedIn() {

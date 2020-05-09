@@ -16,6 +16,7 @@
  import java.util.HashMap;
  import java.util.List;
  import java.util.Map;
+ import java.util.stream.Collectors;
 
  import static java.nio.charset.StandardCharsets.US_ASCII;
  import static java.nio.file.StandardOpenOption.*;
@@ -62,7 +63,7 @@
      private void writeFile(List<String> toWrite) throws IOException {
          Path path = Paths.get(FILE_NAME);
          try {
-             Files.write(path, toWrite, US_ASCII, CREATE, WRITE);
+             Files.write(path, toWrite, US_ASCII, CREATE, WRITE, TRUNCATE_EXISTING);
          } catch (IOException e) {
              throw new IOException("User Database Failed to Write!");
          }
@@ -208,7 +209,7 @@
          }
      }
 
-     public List<UserEntry> getAll() {
-         return new ArrayList<>(map.values());
+     public List<UserEntry> getAllLoggedIn() {
+         return map.values().stream().filter(v -> v.passwordHash != null).collect(Collectors.toList());
      }
  }

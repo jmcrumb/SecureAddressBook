@@ -67,7 +67,7 @@ public class User {
         else return 1;
     }
 
-    public PublicKey getPublicKey() throws GeneralSecurityException, UnsupportedEncodingException {
+    public PublicKey getPublicKey() throws GeneralSecurityException {
         byte[] b = Base64.getDecoder().decode(entry.encryptedPublicKey);
         String k = decrypt(b);
         return Encryption.publicKeyFromB64(k);
