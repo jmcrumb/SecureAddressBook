@@ -223,8 +223,7 @@ public class Fuzzing {
     public static String getValidInput(int minLength, int maxLength) {
         char[] validChars = getValidChars();
         String validInput = "";
-        for(int i = 0; i < getRandom(0, maxLength - 1); i++)
-        {
+        for(int i = 0; i < getRandom(minLength, maxLength - 1); i++) {
             validInput += validChars[getRandom(0,validChars.length - 1)];
         }
         validInput.trim();
@@ -234,8 +233,7 @@ public class Fuzzing {
     public static String getInvalidInput(int minLength, int maxLength) {
         char[] invalidChars = getInvalidChars();
         String invalidInput = "";
-        for(int i = 0; i < getRandom(minLength, maxLength - 1); i++) 
-        {
+        for(int i = 0; i < getRandom(minLength, maxLength - 1); i++)  {
             invalidInput += invalidChars[getRandom(0, invalidChars.length - 1)];
         }
         invalidInput.trim();
@@ -255,11 +253,6 @@ public class Fuzzing {
         return s;
     }
 
-    public static void addSpecificUser(String userID) {
-        loginAdmin();
-        test("ADU "+ userID, "OK");
-        logout();
-    }
 
     public static String getValidRecordID(String userid) {
         String recordID = getValidInput(1, 16);
@@ -336,12 +329,10 @@ public class Fuzzing {
         louTest(2);
     }
 
-    public static void louTest(int user)
-    {
+    public static void louTest(int user) {
         quickLIN(user);
         String expectedOutput = "OK";
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
         test("LOU", expectedOutput);  //no params
@@ -362,7 +353,6 @@ public class Fuzzing {
         test("CHP" + users.get);
         //TODO: CHP admin test
 
-        
     }
 
     public static void adu() {
@@ -374,20 +364,16 @@ public class Fuzzing {
         aduTest(2);
     }
 
-    public static void aduTest(int user)
-    {
+    public static void aduTest(int user) {
         quickLIN(user);
         String expectedOutput = ""; //changed to be no active login session and user not authorized for default user and user respectively
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
-        else if(user == 1)
-        {
+        else if(user == 1) {
             expectedOutput = "User not authorized";
         }
-        else if(user == 2)
-        {
+        else if(user == 2) {
             test("ADU", "Invalid input");   //no params
             test("ADU" + getValidInput(1, 16), "OK");   //valid param
             test("ADU" + getInvalidInput(1, 16), "Invalid input");  //invalid param
@@ -399,8 +385,7 @@ public class Fuzzing {
         test("ADU" + getValidInput(1, 16), expectedOutput); //valid param
         test("ADU" + getInvalidInput(1, 16), expectedOutput);  //invalid param
         test("ADU" + getValidUserID(), expectedOutput);  //param already exists
-        if(user != 0)
-        {
+        if(user != 0) {
             logout();
         }
     }
@@ -415,20 +400,16 @@ public class Fuzzing {
         deuTest(2);
     }
 
-    public static void deuTest(int user)
-    {
+    public static void deuTest(int user) {
         quickLIN(user);
         String expectedOutput = "";
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
-        else if(user == 1)
-        {
+        else if(user == 1) {
             expectedOutput = "User not authorized";
         }
-        else if(user == 2)
-        {
+        else if(user == 2) {
             test("DEU", "Invalid input");   //no params
             dUID = getValidInput(1,16);
             deleteUserTest(dUID, "OK");     //valid param
@@ -441,14 +422,13 @@ public class Fuzzing {
         test("DEU" + getValidInput(1, 16), expectedOutput); //valid param (non-user)
         test("DEU" + getInvalidInput(1, 16), expectedOutput); //invalid param (non-user)
         test("DEU" + getValidUserID(), expectedOutput); //valid param (user); won't delete it due to authorization blocks hopefully
-        if(user != 0)
-        {
+        if(user != 0) {
             logout();   //logs out the user or admin
         }
     }
 
-    public static void deleteUserTest(String deleteUserID, String output){
-        addSpecificUser(deleteUserID);
+    public static void deleteUserTest(String deleteUserID, String output) {
+        out.enterString("ADU "+ deleteUserID, 0);
         test("DEU" + deleteUserID, output);
     }
 
@@ -463,27 +443,22 @@ public class Fuzzing {
         dalTest(2);
     }
 
-    public static void dalTest(int user)
-    {
+    public static void dalTest(int user) {
         quickLIN(user);
         String expectedOutput = "";
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
-        else if(user == 1)
-        {
+        else if(user == 1) {
             expectedOutput = "User not authorized";
         }
-        else if(user == 2)
-        {
+        else if(user == 2) {
             expectedOutput = "CHECK MANUALLY";
         }
         test("DAL", expectedOutput);
         test("DAL" + getValidInput(1, 16), expectedOutput);
         test("DAL" + getInvalidInput(1, 16), expectedOutput);
-        if(user != 0)
-        {
+        if(user != 0) {
             logout();   //logs out the user or admin
         }
     }
@@ -497,15 +472,13 @@ public class Fuzzing {
         adrTest(2);        
     }
 
-    public static void adrTest(int user)
-    {
+    public static void adrTest(int user) {
+        //Logins handled in if statements for sake of retaining user test code
         String expectedOutput = ""; //changed to be no active login session and user not authorized for default user and user respectively
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
-        else if(user == 1)
-        {
+        else if(user == 1) {
             String userID = createValidUserID();
             loginUser(userID);
             test("ADR", "Invalid input");   //no params
@@ -520,8 +493,8 @@ public class Fuzzing {
             logout();
             return;
         }
-        else if(user == 2)
-        {
+        else if(user == 2) {
+            loginAdmin();
             expectedOutput = "User not authorized";
         }
         test("ADR", expectedOutput);   //no params
@@ -533,8 +506,7 @@ public class Fuzzing {
         test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput);   //valid multiple params
         test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput);   //invalid multiple params
         test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(11, 24), true), expectedOutput);  //valid extra params
-        if(user != 0)
-        {
+        if(user != 0) {
             logout();
         }
     }
@@ -594,16 +566,13 @@ public class Fuzzing {
         derTest(2);
     }
 
-    public static void derTest(int user)
-    {
+    public static void derTest(int user) {
         quickLIN(user);
         String expectedOutput = "";
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
-        else if(user == 1)
-        {
+        else if(user == 1) {
             test("DER", "Invalid input");   //no params
             test("DER" + getValidInput(1, 16), "Record not found"); //valid param (non-record)
             test("DER" + getInvalidInput(1, 16), "Invalid input"); //invalid param (can't be record)
@@ -611,22 +580,19 @@ public class Fuzzing {
             logout();
             return;   
         }
-        else if(user == 2)
-        {
+        else if(user == 2) {
             expectedOutput = "User not authorized";
         }
         test("DER", expectedOutput);    //no params
         test("DER" + getValidInput(1, 16), expectedOutput); //valid param (non-record)
         test("DER" + getInvalidInput(1, 16), expectedOutput); //invalid param (can't be record)
         test("DER" + getValidRecordID(getValidUserID()), expectedOutput); //valid param (record); won't delete it due to authorization blocks hopefully
-        if(user != 0)
-        {
+        if(user != 0) {
             logout();   //logs out the user or admin
         }
     }
 
-    public static void testDeleteRecord(String recordID, String output)
-    {
+    public static void testDeleteRecord(String recordID, String output) {
         out.enterString("ADR" + recordID, 0);
         test("DER" + recordID, output);
     }
@@ -640,16 +606,13 @@ public class Fuzzing {
         edrTest(2);
     }
 
-    public static void edrTest(int user)
-    {
+    public static void edrTest(int user) {
         quickLIN(user);
         String expectedOutput = "";
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
-        else if(user == 1)
-        {
+        else if(user == 1) {
             eRID = getValidInput(1,16); //record ID to be tested on
             out.enterString("ADR" + eRID + generateRecordParameters(getRandom(0, 11), true));   //creates a generic recordID with any number of fields
             //no record ID
@@ -674,8 +637,7 @@ public class Fuzzing {
             logout();
             return;
         }
-        else if(user == 2)
-        {
+        else if(user == 2){
             expectedOutput = "User not authorized";
         }
         //no record ID
@@ -695,7 +657,9 @@ public class Fuzzing {
         test("EDR" + eRID + generateRecordParameters(getRandom(0,11), true), expectedOutput); //valid params
         test("EDR" + eRID + generateRecordParameters(getRandom(0,11), false), expectedOutput); //invalid params
         test("EDR" + eRID + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra params
-        logout();
+        if(user != 0) {
+            logout();
+        }
     }
 
 
@@ -712,12 +676,10 @@ public class Fuzzing {
     public static void rerTest(int user) {
         quickLIN(user);
         String expectedOutput = "";
-        if(user == 0)
-        {
+        if(user == 0) {
             expectedOutput = "No active login session";
         }
-        else if(user == 1)
-        {
+        else if(user == 1) {
             rRID = getValidInput(1,16); //record ID to be used for testing
             out.enterString("ADR" + rRID + generateRecordParameters(getRandom(0, 11), true));   //creates a generic recordID with any number of fields initialized
             //no record ID
@@ -731,8 +693,7 @@ public class Fuzzing {
             logout();
             return;
         }
-        else if(user == 2)
-        {
+        else if(user == 2) {
             expectedOutput = "User not authorized";
         }
         test("RER", expectedOutput);
@@ -742,6 +703,9 @@ public class Fuzzing {
         //existing record
         test("RER" + getValidRecordID(getValidUserID()), expectedOutput); //valid param
         test("RER" + rRID + getValidInput(1, 16), expectedOutput);    //extra params
+        if(user != 0) {
+            logout();
+        }
     }
 
 
@@ -816,12 +780,10 @@ public class Fuzzing {
     }
 
     public static void quickLIN(int user) {  //function to take in a code and log in that user (0 = default, 1 = user, 2 = admin)
-        if(user == 1)
-        {
+        if(user == 1) {
             loginUser();
         }
-        else if(user == 2)
-        {
+        else if(user == 2) {
             loginAdmin();
         }
     }
@@ -838,8 +800,7 @@ public class Fuzzing {
     public static hlpTest(int user) {
         quickLIN(user);
         hlpHelper();
-        if(user != 0)
-        {
+        if(user != 0) {
             logout();
         }
     }
