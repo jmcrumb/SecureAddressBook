@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 
+
+//TODO: CHP, EXD
+
+
 public class Fuzzing {
 
     public static HashMap<String, String> users;
@@ -325,73 +329,122 @@ public class Fuzzing {
 
     public static void lou() {
         //default user test
-        test("LOU","No active login session");
-        //admin test
-        loginAdmin();   
-        test("LOU","OK");
-        test("LOU" + getValidInput(1, 25),"OK");
-        test("LOU" + getInvalidInput(1, 25),"OK");
-        logout();
+        louTest(0);
         //user test
-        loginUser();    //not necessarily needed, but throws compiler error otherwise
-        test("LOU","OK");
-        test("LOU" + getValidInput(1, 25),"OK");
-        test("LOU" + getInvalidInput(1, 25),"OK");
-        logout();
+        louTest(1);
+        //admin test
+        louTest(2);
+    }
+
+    public static void louTest(int user)
+    {
+        quickLIN(user);
+        String expectedOutput = "OK";
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        test("LOU", expectedOutput);  //no params
+        quickLIN(user);
+        test("LOU" + getValidInput(1, 25), expectedOutput);  //valid param
+        quickLIN(user);
+        test("LOU" + getInvalidInput(1, 25), expectedOutput);    //invalid param
+        //function will end with default user regardless of user parameter
     }
 
 
-    public static void chp() {  //need to get the user
+    public static void chp() {
+        //default user test
         test("CHP", "No active login session");
+        test("CHP" + getValidInput(8, 24), "No active login session");
+        //TODO: CHP user test
         String tempUserID = loginUser();
-        test("CHP" + users.get)
-        
-        
+        test("CHP" + users.get);
+        //TODO: CHP admin test
+
         
     }
 
     public static void adu() {
         //default user test
-        test("ADU", "No active login session");
-        test("ADU" + getValidInput(1, 16), "No active login session");
-        test("ADU" + getInvalidInput(1, 16), "No active login session");
+        aduTest(0);
         //user test
-        loginUser();
-        test("ADU", "Invalid input");
-        test("ADU" + getValidInput(1, 16), "User not authorized");
-        test("ADU" + getInvalidInput(1, 16), "User not authorized");
-        logout();
+        aduTest(1);
         //admin test
-        loginAdmin();
-        test("ADU", "Invalid input");
-        test("ADU" + getValidInput(1, 16), "OK");
-        test("ADU" + getInvalidInput(1, 16), "Invalid input");
-        logout();
+        aduTest(2);
     }
 
-    public static void deu() {
+    public static void aduTest(int user)
+    {
+        quickLIN(user);
+        String expectedOutput = ""; //changed to be no active login session and user not authorized for default user and user respectively
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        else if(user == 1)
+        {
+            expectedOutput = "User not authorized";
+        }
+        else if(user == 2)
+        {
+            test("ADU", "Invalid input");   //no params
+            test("ADU" + getValidInput(1, 16), "OK");   //valid param
+            test("ADU" + getInvalidInput(1, 16), "Invalid input");  //invalid param
+            test("ADU" + getValidUserID(), "User already exists");  //param already exists 
+            logout();
+            return;
+        }
+        test("ADU", expectedOutput);    //no params
+        test("ADU" + getValidInput(1, 16), expectedOutput); //valid param
+        test("ADU" + getInvalidInput(1, 16), expectedOutput);  //invalid param
+        test("ADU" + getValidUserID(), expectedOutput);  //param already exists
+        if(user != 0)
+        {
+            logout();
+        }
+    }
+
+
+    public static void deu() { 
         //default user test
-        test("DEU", "No active login session");
-        String dUID = getValidInput(1,16);
-        deleteUserTest(dUID, "No active login session");
-        dUID = getInvalidInput(1,16);
-        deleteUserTest(dUID, "No active login session");
-        //admin test
-        loginAdmin();
-        test("DEU", "Invalid input");
-        dUID = getValidInput(1,16);
-        deleteUserTest(dUID, "OK");
-        dUID = getInvalidInput(1,16);
-        deleteUserTest(dUID, "Invalid input");
-        logout();
+        deuTest(0);
         //user test
-        loginUser();
-        test("DEU", "User not authorized");
-        dUID = getValidInput(1,16);
-        deleteUserTest(dUID, "User not authorized");
-        dUID = getInvalidInput(1,16);
-        deleteUserTest(dUID, "User not authorized");
-        logout();
+        deuTest(1);
+        //admin test
+        deuTest(2);
+    }
+
+    public static void deuTest(int user)
+    {
+        quickLIN(user);
+        String expectedOutput = "";
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        else if(user == 1)
+        {
+            expectedOutput = "User not authorized";
+        }
+        else if(user == 2)
+        {
+            test("DEU", "Invalid input");   //no params
+            dUID = getValidInput(1,16);
+            deleteUserTest(dUID, "OK");     //valid param
+            dUID = getInvalidInput(1,16);
+            deleteUserTest(dUID, "Invalid input");  //invalid param
+            logout();
+            return;
+        }
+        test("DEU", expectedOutput);    //no params
+        test("DEU" + getValidInput(1, 16), expectedOutput); //valid param (non-user)
+        test("DEU" + getInvalidInput(1, 16), expectedOutput); //invalid param (non-user)
+        test("DEU" + getValidUserID(), expectedOutput); //valid param (user); won't delete it due to authorization blocks hopefully
+        if(user != 0)
+        {
+            logout();   //logs out the user or admin
+        }
     }
 
     public static void deleteUserTest(String deleteUserID, String output){
@@ -399,39 +452,91 @@ public class Fuzzing {
         test("DEU" + deleteUserID, output);
     }
 
-    public static void dal() throws InterruptedException {
-        test("DAL", "No active login session");
-        loginUser();
-        test("DAL", "User not authorized");
-        logout();
-        loginAdmin();
-        test("DAL", "CHECK MANUALLY");
-        test("DAL " + getValidInput(1, 24), "CHECK MANUALLY");
-        logout();
+
+
+    public static void dal() throws InterruptedException {  //needs manual checking
+        //default user test
+        dalTest(0);
+        //user test
+        dalTest(1);
+        //admin test
+        dalTest(2);
+    }
+
+    public static void dalTest(int user)
+    {
+        quickLIN(user);
+        String expectedOutput = "";
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        else if(user == 1)
+        {
+            expectedOutput = "User not authorized";
+        }
+        else if(user == 2)
+        {
+            expectedOutput = "CHECK MANUALLY";
+        }
+        test("DAL", expectedOutput);
+        test("DAL" + getValidInput(1, 16), expectedOutput);
+        test("DAL" + getInvalidInput(1, 16), expectedOutput);
+        if(user != 0)
+        {
+            logout();   //logs out the user or admin
+        }
     }
 
     public static void adr() {
-        //no log in
-        test("ADR " + getValidInput(1, 16), "No active login session");
-        //user logged in
-        String userID = createValidUserID();
-        loginUser(userID);
-        test("ADR", "Invalid input");
-        test("ADR " + getInvalidInput(0, 64), "Invalid input");
-        String addressID = getValidInput(1, 16);
-        test("ADR " + addressID, "OK");
-        test("ADR " + addressID, "Record already exists");
-        //param testing
-        test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), true), "OK");
-        test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), false), "Invalid input");
-        test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(11, 24), true), "OK");
-        logout();
-        //admin
-        loginAdmin();
-        test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), true), "User not authorized");
-        logout();
+        //default user test
+        adrTest(0);
+        //user test
+        adrTest(1);
+        //admin test
+        adrTest(2);        
+    }
 
-        
+    public static void adrTest(int user)
+    {
+        String expectedOutput = ""; //changed to be no active login session and user not authorized for default user and user respectively
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        else if(user == 1)
+        {
+            String userID = createValidUserID();
+            loginUser(userID);
+            test("ADR", "Invalid input");   //no params
+            test("ADR " + getInvalidInput(0, 64), "Invalid input"); //invalid param
+            String addressID = getValidInput(1, 16);
+            test("ADR " + addressID, "OK"); //valid param
+            test("ADR " + addressID, "Record already exists");  //param already exists
+            //param testing
+            test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), true), "OK");   //valid multiple params
+            test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), false), "Invalid input");   //invalid multiple params
+            test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(11, 24), true), "OK");  //valid extra params
+            logout();
+            return;
+        }
+        else if(user == 2)
+        {
+            expectedOutput = "User not authorized";
+        }
+        test("ADR", expectedOutput);   //no params
+        test("ADR " + getInvalidInput(0, 64), expectedOutput); //invalid param
+        String addressID = getValidInput(1, 16);
+        test("ADR " + addressID, expectedOutput); //valid param
+        test("ADR " + addressID, expectedOutput);  //param already exists
+        //param testing
+        test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput);   //valid multiple params
+        test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput);   //invalid multiple params
+        test("ADR " + getValidInput(1, 16) + generateRecordParameters(getRandom(11, 24), true), expectedOutput);  //valid extra params
+        if(user != 0)
+        {
+            logout();
+        }
     }
 
     public static String generateRecordParameters(int numberParams, boolean isValid) {
@@ -482,50 +587,169 @@ public class Fuzzing {
 
     public static void der() {
         //default user test
-        test("DER", "No active login session");
-        String dRID = getValidInput(1, 16);
-        testDeleteRecord(dRID, "No active login session");
-        dRID = getInvalidInput(1, 16);
-        testDeleteRecord(dRID, "No active login session");
-        //admin test
-        loginAdmin();
-        test("DER", "User not authorized");
-        dRID = getValidInput(1, 16);
-        testDeleteRecord(dRID, "User not authorized");
-        dRID = getInvalidInput(1, 16);
-        testDeleteRecord(dRID, "User not authorized");
-        logout();
+        derTest(0);
         //user test
-        loginUser();
-        test("DER", "Invalid input");
-        dRID = getValidInput(1, 16);
-        testDeleteRecord(dRID, "OK");
-        dRID = getInvalidInput(1, 16);
-        testDeleteRecord(dRID, "Invalid input");
-        logout();
+        derTest(1);
+        //admin test
+        derTest(2);
+    }
+
+    public static void derTest(int user)
+    {
+        quickLIN(user);
+        String expectedOutput = "";
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        else if(user == 1)
+        {
+            test("DER", "Invalid input");   //no params
+            test("DER" + getValidInput(1, 16), "Record not found"); //valid param (non-record)
+            test("DER" + getInvalidInput(1, 16), "Invalid input"); //invalid param (can't be record)
+            testDeleteRecord(getValidInput(1, 16), "OK");     //valid param (record); testDeleteRecord will create the record then test deleting it
+            logout();
+            return;   
+        }
+        else if(user == 2)
+        {
+            expectedOutput = "User not authorized";
+        }
+        test("DER", expectedOutput);    //no params
+        test("DER" + getValidInput(1, 16), expectedOutput); //valid param (non-record)
+        test("DER" + getInvalidInput(1, 16), expectedOutput); //invalid param (can't be record)
+        test("DER" + getValidRecordID(getValidUserID()), expectedOutput); //valid param (record); won't delete it due to authorization blocks hopefully
+        if(user != 0)
+        {
+            logout();   //logs out the user or admin
+        }
     }
 
     public static void testDeleteRecord(String recordID, String output)
     {
-        addSpecificRecord(recordID);
-        test("DER" + recordID, output);
-    }
-    public static void addSpecificRecord(String recordID)
-    {
         out.enterString("ADR" + recordID, 0);
+        test("DER" + recordID, output);
     }
 
     public static void edr() {
-        //defaut user test
-        
+        //default user test
+        edrTest(0);
+        //user test
+        edrTest(1);
+        //admin test (tests same record ID to ensure no access)
+        edrTest(2);
     }
+
+    public static void edrTest(int user)
+    {
+        quickLIN(user);
+        String expectedOutput = "";
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        else if(user == 1)
+        {
+            eRID = getValidInput(1,16); //record ID to be tested on
+            out.enterString("ADR" + eRID + generateRecordParameters(getRandom(0, 11), true));   //creates a generic recordID with any number of fields
+            //no record ID
+            test("EDR", "Invalid input");
+            //non-existing record ID w/ valid chars
+            expectedOutput = "Record not found";
+            test("EDR" + getValidInput(1,16), expectedOutput); //no params
+            test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+            test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+            test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+            //non-existing record ID w/ invalid chars
+            expectedOutput = "Invalid input";
+            test("EDR" + getInvalidInput(1,16), expectedOutput);   //no params
+            test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+            test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+            test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+            //valid existing recordID      
+            test("EDR" + eRID, "Invalid input"); //no params
+            test("EDR" + eRID + generateRecordParameters(getRandom(0,11), true), "OK"); //valid params
+            test("EDR" + eRID + generateRecordParameters(getRandom(0,11), false), "Invalid input"); //invalid params
+            test("EDR" + eRID + generateRecordParameters(getRandom(12, 24), true), "OK"); //extra params
+            logout();
+            return;
+        }
+        else if(user == 2)
+        {
+            expectedOutput = "User not authorized";
+        }
+        //no record ID
+        test("EDR", expectedOutput);
+        //non-existing record ID w/ valid chars
+        test("EDR" + getValidInput(1,16), expectedOutput); //no params
+        test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+        test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+        test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+        //non-existing record ID w/ invalid chars
+        test("EDR" + getInvalidInput(1,16), expectedOutput);   //no params
+        test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+        test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+        test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+        //valid existing recordID      
+        test("EDR" + eRID, expectedOutput); //no params
+        test("EDR" + eRID + generateRecordParameters(getRandom(0,11), true), expectedOutput); //valid params
+        test("EDR" + eRID + generateRecordParameters(getRandom(0,11), false), expectedOutput); //invalid params
+        test("EDR" + eRID + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra params
+        logout();
+    }
+
+
 
     public static void rer() {
-        
+        //default user test
+        rerTest(0);
+        //user test
+        rerTest(1);
+        //admin test
+        rerTest(2);
     }
 
+    public static void rerTest(int user) {
+        quickLIN(user);
+        String expectedOutput = "";
+        if(user == 0)
+        {
+            expectedOutput = "No active login session";
+        }
+        else if(user == 1)
+        {
+            rRID = getValidInput(1,16); //record ID to be used for testing
+            out.enterString("ADR" + rRID + generateRecordParameters(getRandom(0, 11), true));   //creates a generic recordID with any number of fields initialized
+            //no record ID
+            test("RER", "Invalid input");
+            //non-existing record
+            test("RER" + getValidInput(1, 16), "Record not found"); //valid param (non-record)
+            test("RER" + getInvalidInput(1, 16), "Invalid input");  //invalid param (can't be record)
+            //existing record
+            test("RER" + rRID, "OK"); //valid param
+            test("RER" + rRID + getValidInput(1, 16), "OK");    //extra params
+            logout();
+            return;
+        }
+        else if(user == 2)
+        {
+            expectedOutput = "User not authorized";
+        }
+        test("RER", expectedOutput);
+        //non-existing record
+        test("RER" + getValidInput(1, 16), expectedOutput); //valid param
+        test("RER" + getInvalidInput(1, 16), expectedOutput);  //invalid param
+        //existing record
+        test("RER" + getValidRecordID(getValidUserID()), expectedOutput); //valid param
+        test("RER" + rRID + getValidInput(1, 16), expectedOutput);    //extra params
+    }
+
+
+
     public static void imd() {
+        //default user test
         test("IMD notloggedin", "No active login session");
+        //user test
         loginUser();
         test("IMD", "Invalid input");
         test("IMD" + getInvalidInput(1, 24), "Invalid input");
@@ -538,6 +762,7 @@ public class Fuzzing {
         //TODO: populate corruptdatabase file with valid database export
         test("IMD FuzzFiles/testfiles/gooddatabase.csv", "OK");
         logout();
+        //admin test
         loginAdmin();
         //TODO: populate corruptdatabase file with modified database export
         test("IMD FuzzFiles/testfiles/gooddatabase.csv", "User not authorized");
@@ -556,30 +781,67 @@ public class Fuzzing {
     }
 
     public static void exd() {
+        //TODO: EXD default user test with file names
+        test("EXD", "No active login session"); //no params
+        test("EXD" + getValidInput(1, 16), "Invalid input");    //valid params
+        test("EXD" + getInvalidInput(1, 16), "No active login session");   //invalid params
+        test("EXD" + getValidInput(1, 16) + getValidInput(1, 16), "No active login session");   //extra params
+
+        //TODO: EXD user test
+
+        //TODO: EXD admin test
         
     }
 
     public static void ext() {
-        test("EXT", "OK");
+        //default user test
+        extTest(0);
+        //user test
+        extTest(1);
+        //admin test
+        extTest(2);
+    }
+
+    public static void extTest(int user) {   //function to test full fucntionality of exit function for a type of user
+        quickLIN(user);
+        String expectedOutput = "OK";
+        test("EXT", expectedOutput);
         startup();
-        loginUser();
-        test("EXT", "OK");
+        quickLIN(user);
+        test("EXT " + getValidInput(1, 24), expectedOutput);
         startup();
-        loginAdmin();
-        test("EXT", "OK");
+        quickLIN(user);
+        test("EXT " + getInvalidInput(1, 24), expectedOutput);
         startup();
-        test("EXT " + getValidInput(1, 24), "OK");
-        startup();
+    }
+
+    public static void quickLIN(int user) {  //function to take in a code and log in that user (0 = default, 1 = user, 2 = admin)
+        if(user == 1)
+        {
+            loginUser();
+        }
+        else if(user == 2)
+        {
+            loginAdmin();
+        }
     }
     
     public static void hlp() {
+        //default user test
+        hlpTest(0);
+        //user test
+        hlpTest(1);
+        //admin test
+        hlpTest(2);
+    }
+
+    public static hlpTest(int user) {
+        quickLIN(user);
         hlpHelper();
-        loginAdmin();
-        hlpHelper();
-        logout();
-        loginUser();
-        hlpHelper();
-        logout();
+        if(user != 0)
+        {
+            logout();
+        }
     }
 
     public static void hlpHelper() {
@@ -598,8 +860,7 @@ public class Fuzzing {
         test("HLP " + s, "OK");
     }
 
-    public static void test(String fullInput, String expectedOutput)
-    {
+    public static void test(String fullInput, String expectedOutput) {
         out.enterString(fullInput, 0);
         assertion(fullInput, expectedOutput);
     }
