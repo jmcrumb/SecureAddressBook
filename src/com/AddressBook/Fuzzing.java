@@ -9,10 +9,6 @@ import java.io.IOException;
 import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 
-
-//TODO: EXD
-
-
 public class Fuzzing {
 
     public static HashMap<String, String> users;
@@ -352,7 +348,6 @@ public class Fuzzing {
         //admin test
         chpTest(2);
     }
-
 
     public static void chpTest(int user) {
         String expectedOutput = "No active login session";
@@ -798,16 +793,20 @@ public class Fuzzing {
     }
 
     public static void exd() {
-        //TODO: EXD default user test with file names
+        //default user
         test("EXD", "No active login session"); //no params
-        test("EXD" + getValidInput(1, 16), "Invalid input");    //valid params
-        test("EXD" + getInvalidInput(1, 16), "No active login session");   //invalid params
-        test("EXD" + getValidInput(1, 16) + getValidInput(1, 16), "No active login session");   //extra params
-
-        //TODO: EXD user test
-
-        //TODO: EXD admin test
-        
+        //admin
+        loginAdmin();
+        test("EXD", "No active login session");
+        logout();
+        //user
+        loginUser();
+        test("EXD", "Invalid input");    //no params
+        test("EXD" + getInvalidInput(1, 16), "Invalid input");   //invalid params
+        test("EXD " + getValidInput(1, 24) +"/"+getValidInput(1, 24), "Output file invalid format");
+        test("EXD FuzFiles/testfiles/export_" + getValidInput(1, 16) + getValidInput(1, 16), "OK");   //extra params
+        test("EXD FuzFiles/testfiles/export_" + getValidInput(1, 16), "OK");    //valid param
+        logout();          
     }
 
     public static void ext() {
@@ -850,7 +849,7 @@ public class Fuzzing {
         hlpTest(2);
     }
 
-    public static hlpTest(int user) {
+    public static void hlpTest(int user) {
         quickLIN(user);
         hlpHelper();
         if(user != 0) {
