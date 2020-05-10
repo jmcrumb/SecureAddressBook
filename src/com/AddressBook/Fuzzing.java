@@ -397,12 +397,6 @@ public class Fuzzing {
     }
 
 
-    public static chpHelper(String oldpw)
-    {
-        out.enterString("CHP" + oldpw);
-    }
-
-
     public static void adu() {
         //default user test
         aduTest(0);
