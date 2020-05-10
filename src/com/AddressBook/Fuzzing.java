@@ -10,7 +10,7 @@ import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 
 
-//TODO: CHP, EXD
+//TODO: CHP
 
 
 public class Fuzzing {
@@ -350,7 +350,19 @@ public class Fuzzing {
         test("CHP" + getValidInput(8, 24), "No active login session");
         //TODO: CHP user test
         String tempUserID = loginUser();
-        test("CHP" + users.get);
+        test("CHP" + users.get(tempUserID), "");    //invalid new password
+        test(getInvalidInput(1, 64), "Invalid password");
+        test("CHP" + users.get(tempUserID), "");    //invalid second password
+        test(getValidInput(1, 64), "");
+        test(getInvalidInput(1, 64), "Invalid password");
+        test("CHP" + users.get(tempUserID), "");    //non matching second password
+        String p1 = getValidInput(1, 64);
+        test(p1, "");
+        String p2 = null;
+        while(p1 == (p2 = getValidInput(1, 64)));
+        test(p2, "Passwords do not match");
+        
+
         //TODO: CHP admin test
 
     }
@@ -745,16 +757,20 @@ public class Fuzzing {
     }
 
     public static void exd() {
-        //TODO: EXD default user test with file names
+        //default user
         test("EXD", "No active login session"); //no params
-        test("EXD" + getValidInput(1, 16), "Invalid input");    //valid params
-        test("EXD" + getInvalidInput(1, 16), "No active login session");   //invalid params
-        test("EXD" + getValidInput(1, 16) + getValidInput(1, 16), "No active login session");   //extra params
-
-        //TODO: EXD user test
-
-        //TODO: EXD admin test
-        
+        //admin
+        loginAdmin();
+        test("EXD", "No active login session");
+        logout();
+        //user
+        loginUser();
+        test("EXD", "Invalid input");    //no params
+        test("EXD" + getInvalidInput(1, 16), "Invalid input");   //invalid params
+        test("EXD " + getValidInput(1, 24) +"/"+getValidInput(1, 24), "Output file invalid format");
+        test("EXD FuzFiles/testfiles/export_" + getValidInput(1, 16) + getValidInput(1, 16), "OK");   //extra params
+        test("EXD FuzFiles/testfiles/export_" + getValidInput(1, 16), "OK");    //valid param
+        logout();          
     }
 
     public static void ext() {
@@ -797,7 +813,7 @@ public class Fuzzing {
         hlpTest(2);
     }
 
-    public static hlpTest(int user) {
+    public static void hlpTest(int user) {
         quickLIN(user);
         hlpHelper();
         if(user != 0) {
