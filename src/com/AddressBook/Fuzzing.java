@@ -10,7 +10,7 @@ import java.awt.AWTException;
 import java.awt.event.KeyEvent;
 
 
-//TODO: CHP, EXD
+//TODO: EXD
 
 
 public class Fuzzing {
@@ -346,14 +346,67 @@ public class Fuzzing {
 
     public static void chp() {
         //default user test
-        test("CHP", "No active login session");
-        test("CHP" + getValidInput(8, 24), "No active login session");
-        //TODO: CHP user test
-        String tempUserID = loginUser();
-        test("CHP" + users.get);
-        //TODO: CHP admin test
-
+        chpTest(0);
+        //user test
+        chpTest(1);
+        //admin test
+        chpTest(2);
     }
+
+
+    public static void chpTest(int user) {
+        String expectedOutput = "No active login session";
+        String oldpw = "";
+        String currUser = "";
+        if(user == 0) {
+            test("CHP", expectedOutput);    //no params
+            test("CHP" + getValidInput(8, 24), expectedOutput); //valid param
+            test("CHP" + getInvalidInput(8, 24), expectedOutput);   //invalid param
+            return; 
+        }
+        if(user == 1) {
+            oldpw = getPassword(loginUser());
+            currUser = "User";
+        }
+        else if(user == 2) {
+            loginAdmin();
+            oldpw = "ADMIN_PASSWORD";
+            currUser = "Admin";
+        }
+        //no params
+        test("CHP", "Invalid input");
+        //valid/invalid param (not old pw)
+        test("CHP" + getValidInput(8, 24), "Incorrect password");
+        test("CHP" + getInvalidInput(8, 24), "Invalid input");
+        //using old pw
+        out.enterString("CHP" + oldpw, 0);  //invalid new pw
+        out.enterString(getInvalidInput(8, 24), 0);
+        assertion("CHP" + currUser + "invalid new pw", "Invalid password");
+        out.enterString("CHP" + oldpw, 0);   //valid non-matching new pw
+        out.enterString(getValidInput(8, 24), 0);
+        out.enterString(getValidInput(8, 24), 0);
+        assertion("CHP" + currUser + "valid non-matching new pw", "Passwords don\'t match");
+        out.enterString("CHP" + oldpw, 0);  //valid matching new pw
+        String newpw = getValidInput(8, 24);
+        out.enterString(newpw, 0);
+        out.enterString(newpw, 0);
+        assertion("CHP" + currUser + "valid matching new pw", "OK");
+        if(user == 2) { //reset admin pw
+            out.enterString("CHP" + newpw, 0);
+            out.enterString(oldpw, 0);
+            out.enterString(oldpw, 0);
+        }
+        if(user != 0) {
+            logout();
+        }
+    }
+
+
+    public static chpHelper(String oldpw)
+    {
+        out.enterString("CHP" + oldpw);
+    }
+
 
     public static void adu() {
         //default user test
