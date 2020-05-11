@@ -28,7 +28,8 @@ public class User {
 
     public static User getInstance() {
         if(instance == null)
-            return new User();
+            instance = new User();
+            return instance;
         return instance;
     }
 
