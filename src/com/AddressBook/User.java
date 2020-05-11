@@ -8,7 +8,6 @@ package com.AddressBook;
 
 import com.AddressBook.UserEntry.*;
 
-import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Base64;

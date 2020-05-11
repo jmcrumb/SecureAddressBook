@@ -6,8 +6,6 @@
   * */
  package com.AddressBook.UserEntry;
 
- import java.util.Arrays;
-
  public class UserEntry {
      final public String userId;
      final public String passwordHash;

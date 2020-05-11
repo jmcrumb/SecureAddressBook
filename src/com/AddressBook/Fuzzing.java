@@ -18,7 +18,7 @@ public class Fuzzing {
     public static final String LOG_FILEPATH = "FuzzFiles/fuzzlogs/fuzzlog.csv";
     public static FileWriter log;
 
-    private class Output {
+    public static class Output {
         private Robot r;
         private int delay;
 
@@ -453,7 +453,7 @@ public class Fuzzing {
         }
         else if(user == 2) {
             test("DEU", "Invalid input");   //no params
-            dUID = getValidInput(1,16);
+            String dUID = getValidInput(1,16);
             deleteUserTest(dUID, "OK");     //valid param
             dUID = getInvalidInput(1,16);
             deleteUserTest(dUID, "Invalid input");  //invalid param
@@ -651,12 +651,12 @@ public class Fuzzing {
     public static void edrTest(int user) {
         quickLIN(user);
         String expectedOutput = "";
+        String eRID = getValidInput(1,16); //record ID to be tested on
         if(user == 0) {
             expectedOutput = "No active login session";
         }
         else if(user == 1) {
-            eRID = getValidInput(1,16); //record ID to be tested on
-            out.enterString("ADR" + eRID + generateRecordParameters(getRandom(0, 11), true));   //creates a generic recordID with any number of fields
+            out.enterString("ADR" + eRID + generateRecordParameters(getRandom(0, 11), true), 0);   //creates a generic recordID with any number of fields
             //no record ID
             test("EDR", "Invalid input");
             //non-existing record ID w/ valid chars
@@ -718,12 +718,12 @@ public class Fuzzing {
     public static void rerTest(int user) {
         quickLIN(user);
         String expectedOutput = "";
+        String rRID = getValidInput(1,16); //record ID to be used for testing
         if(user == 0) {
             expectedOutput = "No active login session";
         }
         else if(user == 1) {
-            rRID = getValidInput(1,16); //record ID to be used for testing
-            out.enterString("ADR" + rRID + generateRecordParameters(getRandom(0, 11), true));   //creates a generic recordID with any number of fields initialized
+            out.enterString("ADR" + rRID + generateRecordParameters(getRandom(0, 11), true), 0);   //creates a generic recordID with any number of fields initialized
             //no record ID
             test("RER", "Invalid input");
             //non-existing record
@@ -763,14 +763,11 @@ public class Fuzzing {
         randomNoiseFile("FuzzFiles/testfiles/randomdatabase.csv");
         test("IMD FuzzFiles/testfiles/emptydatabase.csv", "Invalid file");
         test("IMD FuzzFiles/testfiles/randomdatabase.csv", "Invalid file");
-        //TODO: populate corruptdatabase file with modified database export
         test("IMD FuzzFiles/testfiles/corruptdatabase.csv", "Invalid file");
-        //TODO: populate corruptdatabase file with valid database export
         test("IMD FuzzFiles/testfiles/gooddatabase.csv", "OK");
         logout();
         //admin test
         loginAdmin();
-        //TODO: populate corruptdatabase file with modified database export
         test("IMD FuzzFiles/testfiles/gooddatabase.csv", "User not authorized");
         logout();
     }

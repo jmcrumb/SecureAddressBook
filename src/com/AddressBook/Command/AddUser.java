@@ -8,13 +8,7 @@ package com.AddressBook.Command;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-
-import com.AddressBook.AuditLog;
 import com.AddressBook.Database.UserDatabase;
-import com.AddressBook.Encryption;
-import com.AddressBook.User;
 import com.AddressBook.UserEntry.UserEntry;
 
  public class AddUser extends Command{
