@@ -222,7 +222,7 @@ public class Fuzzing {
         for(int i = 0; i < getRandom(minLength, maxLength - 1); i++) {
             validInput += validChars[getRandom(0,validChars.length - 1)];
         }
-        validInput.trim();
+        validInput = validInput.trim();
         return validInput;
     }
 
@@ -232,7 +232,7 @@ public class Fuzzing {
         for(int i = 0; i < getRandom(minLength, maxLength - 1); i++)  {
             invalidInput += invalidChars[getRandom(0, invalidChars.length - 1)];
         }
-        invalidInput.trim();
+        invalidInput = invalidInput.trim();
         return invalidInput;
     }
 
