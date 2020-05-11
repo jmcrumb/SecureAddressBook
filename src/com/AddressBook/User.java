@@ -6,7 +6,8 @@
  * */
 package com.AddressBook;
 
-import com.AddressBook.UserEntry.*;
+import com.AddressBook.UserEntry.AdminEntry;
+import com.AddressBook.UserEntry.UserEntry;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -27,9 +28,8 @@ public class User {
 
 
     public static User getInstance() {
-        if(instance == null)
+        if (instance == null)
             instance = new User();
-            return instance;
         return instance;
     }
 
@@ -53,7 +53,7 @@ public class User {
         return Encryption.encrypt(data, DBKey);
     }
 
-    public String decrypt(byte[] data) throws java.security.GeneralSecurityException  {
+    public String decrypt(byte[] data) throws java.security.GeneralSecurityException {
         if (DBKey == null || entry == null) {
             throw new RuntimeException("User is not initialized.");
         }
