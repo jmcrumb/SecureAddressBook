@@ -2,7 +2,6 @@ package com.AddressBook;
 
 import java.util.HashMap;
 import java.util.Random;
-import java.util.regex.Pattern;
 import java.awt.Robot;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -12,6 +11,9 @@ import java.awt.event.KeyEvent;
 
 public class Fuzzing {
 
+    /**
+     *
+     */
     public static HashMap<String, String> users;
     public static Random rand;
     public static Output out = null;
@@ -25,38 +27,84 @@ public class Fuzzing {
 
         public Output(int delay) throws AWTException {
             r = new Robot();
+            this.delay = delay;
         }
 
         public void enterString(String message, int keyDelay) {
+            boolean shiftPressed = false;
             for (int i = 0; i < message.length(); i++) {
                 char c = message.charAt(i);
                 if (Character.isUpperCase(c)) {
                     r.keyPress(KeyEvent.VK_SHIFT);
+                    shiftPressed = true;
                 }
-                if ((c+"").matches("[\\{\\}<>?~!@#$%^&*\\(\\)_+|\":]")) {
+                else if ((c + "").matches("[\\{\\}<>?~!@#$%^&*\\(\\)_+|\":]")) {
                     r.keyPress(KeyEvent.VK_SHIFT);
+                    shiftPressed = true;
                     switch (c) {
-                        case '{': c = '['; break;
-                        case '}': c = ']'; break;
-                        case '<': c = ','; break;
-                        case '>': c = '.'; break;
-                        case '?': c = '/'; break;
-                        case '~': c = '`'; break;
-                        case '!': c = '1'; break;
-                        case '@': c = '2'; break;
-                        case '#': c = '3'; break;
-                        case '$': c = '4'; break;
-                        case '%': c = '5'; break;
-                        case '^': c = '6'; break;
-                        case '&': c = '7'; break;
-                        case '*': c = '8'; break;
-                        case '(': c = '9'; break;
-                        case ')': c = '0'; break;
-                        case '_': c = '-'; break;
-                        case '+': c = '='; break;
-                        case '|': c = '\\'; break;
-                        case '"': c = '\''; break;
-                        case ':': c = ';'; break;
+                        case '{':
+                            c = '[';
+                            break;
+                        case '}':
+                            c = ']';
+                            break;
+                        case '<':
+                            c = ',';
+                            break;
+                        case '>':
+                            c = '.';
+                            break;
+                        case '?':
+                            c = '/';
+                            break;
+                        case '~':
+                            c = '`';
+                            break;
+                        case '!':
+                            c = '1';
+                            break;
+                        case '@':
+                            c = '2';
+                            break;
+                        case '#':
+                            c = '3';
+                            break;
+                        case '$':
+                            c = '4';
+                            break;
+                        case '%':
+                            c = '5';
+                            break;
+                        case '^':
+                            c = '6';
+                            break;
+                        case '&':
+                            c = '7';
+                            break;
+                        case '*':
+                            c = '8';
+                            break;
+                        case '(':
+                            c = '9';
+                            break;
+                        case ')':
+                            c = '0';
+                            break;
+                        case '_':
+                            c = '-';
+                            break;
+                        case '+':
+                            c = '=';
+                            break;
+                        case '|':
+                            c = '\\';
+                            break;
+                        case '"':
+                            c = '\'';
+                            break;
+                        case ':':
+                            c = ';';
+                            break;
                     }
                 }
                 try {
@@ -66,11 +114,9 @@ public class Fuzzing {
                     System.out.printf("key: %c\n", c);
                 }
 
-                if (Character.isUpperCase(c)) {
+                if (shiftPressed) {
                     r.keyRelease(KeyEvent.VK_SHIFT);
-                }
-                if ((c+"").matches("[\\]\\}<>?~!@#$%^&*()_+|\":]")) {
-                    r.keyRelease(KeyEvent.VK_SHIFT);
+                    shiftPressed = false;
                 }
                 if (keyDelay > 0)
                     r.delay(keyDelay);
@@ -84,16 +130,23 @@ public class Fuzzing {
     public static void main(String[] args) {
         users = new HashMap<String, String>();
         rand = new Random();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         try {
             log = new FileWriter(LOG_FILEPATH);
-            out = new Output(50);
+            out = new Output(100);
             startup();
-            //testing
+            // testing
             lin();
-            for(int userPopulation = 0; userPopulation < 10; userPopulation++) {
+            for (int userPopulation = 0; userPopulation < 10; userPopulation++) {
                 createValidUserID();
             }
-            for(int passes = 0; passes < 20; passes++) {
+            for (int passes = 0; passes < 20; passes++) {
                 adr();
                 adu();
                 chp();
@@ -121,9 +174,9 @@ public class Fuzzing {
         }
     }
 
-    //starts up the addressbook application
+    // starts up the addressbook application
     public static void startup() {
-        out.enterString("java Application", 0);
+        out.enterString("java -jar AddressBook.jar", 0);
     }
 
     //Get userID's that already exists in the address book
@@ -131,7 +184,7 @@ public class Fuzzing {
         if (users.size() == 0)
             throw new IllegalArgumentException("No users");
         int index = getRandom(0, users.size());
-        String[] ids = (String[]) users.keySet().toArray();
+        String[] ids = users.keySet().toArray(String[]::new);
         return ids[index];
     }
 
@@ -209,7 +262,7 @@ public class Fuzzing {
 
     public static void loginAdmin() {
         out.enterString("LIN admin", 0);
-        out.enterString("ADMIN_PASSWORD", 0);
+        out.enterString(ADMIN_PASSWORD, 0);
         assertion("Admin login", "OK");
     }
 
@@ -305,9 +358,9 @@ public class Fuzzing {
         assertion("Admin invalid password", "Invalid Password");
         //admin valid 
         out.enterString("LIN admin", 0);
-        out.enterString("ADMIN_PASSWORD", 0);
-        out.enterString("ADMIN_PASSWORD", 0);
-        assertion("ADMIN_PASSWORD", "OK");
+        out.enterString(ADMIN_PASSWORD, 0);
+        out.enterString(ADMIN_PASSWORD, 0);
+        assertion(ADMIN_PASSWORD, "OK");
         logout();
         //valid login
         loginHelper();
@@ -328,7 +381,7 @@ public class Fuzzing {
         //Invalid username
         test("LIN " + getInvalidInput(1, 16), "Invalid userID");
         //Subsequent logins
-        testSubsequentLogins("admin", "ADMIN_PASSWORD");
+        testSubsequentLogins("admin", ADMIN_PASSWORD);
         String userID = createValidUserID();
         testSubsequentLogins(userID, users.get(userID));
         //already logged in
@@ -407,7 +460,7 @@ public class Fuzzing {
         }
         else if(user == 2) {
             loginAdmin();
-            oldpw = "ADMIN_PASSWORD";
+            oldpw = ADMIN_PASSWORD;
             currUser = "Admin";
         }
         //no params
@@ -897,11 +950,11 @@ public class Fuzzing {
 
         test("HLP " + getValidInput(1, 24), "Unrecognized command");
         test("HLP " + getInvalidInput(1, 24), "Invalid input");
-        test("HLP " + commands[getRandom(0, 15)], "OK");
-        test("HLP " + commands[getRandom(0, 15)] + " " + getValidInput(1, 24), "OK");
+        test("HLP " + commands[getRandom(0, 14)], "OK");
+        test("HLP " + commands[getRandom(0, 14)] + " " + getValidInput(1, 24), "OK");
         String s = "";
-        for(int i = 0; i < getRandom(2, 15); i++) {
-            s += commands[getRandom(0, 15)] + " ";
+        for(int i = 0; i < getRandom(2, 14); i++) {
+            s += commands[getRandom(0, 14)] + " ";
         }
         test("HLP " + s, "OK");
     }
