@@ -2,6 +2,7 @@ package com.AddressBook;
 
 import java.util.HashMap;
 import java.util.Random;
+import java.util.regex.Pattern;
 import java.awt.Robot;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -32,10 +33,43 @@ public class Fuzzing {
                 if (Character.isUpperCase(c)) {
                     r.keyPress(KeyEvent.VK_SHIFT);
                 }
-                r.keyPress(Character.toUpperCase(c));
-                r.keyRelease(Character.toUpperCase(c));
+                if ((c+"").matches("[\\{\\}<>?~!@#$%^&*\\(\\)_+|\":]")) {
+                    r.keyPress(KeyEvent.VK_SHIFT);
+                    switch (c) {
+                        case '{': c = '['; break;
+                        case '}': c = ']'; break;
+                        case '<': c = ','; break;
+                        case '>': c = '.'; break;
+                        case '?': c = '/'; break;
+                        case '~': c = '`'; break;
+                        case '!': c = '1'; break;
+                        case '@': c = '2'; break;
+                        case '#': c = '3'; break;
+                        case '$': c = '4'; break;
+                        case '%': c = '5'; break;
+                        case '^': c = '6'; break;
+                        case '&': c = '7'; break;
+                        case '*': c = '8'; break;
+                        case '(': c = '9'; break;
+                        case ')': c = '0'; break;
+                        case '_': c = '-'; break;
+                        case '+': c = '='; break;
+                        case '|': c = '\\'; break;
+                        case '"': c = '\''; break;
+                        case ':': c = ';'; break;
+                    }
+                }
+                try {
+                    r.keyPress(Character.toUpperCase(c));
+                    r.keyRelease(Character.toUpperCase(c));
+                } catch (IllegalArgumentException e) {
+                    System.out.printf("key: %c\n", c);
+                }
 
                 if (Character.isUpperCase(c)) {
+                    r.keyRelease(KeyEvent.VK_SHIFT);
+                }
+                if ((c+"").matches("[\\]\\}<>?~!@#$%^&*()_+|\":]")) {
                     r.keyRelease(KeyEvent.VK_SHIFT);
                 }
                 if (keyDelay > 0)
@@ -60,11 +94,19 @@ public class Fuzzing {
                 createValidUserID();
             }
             for(int passes = 0; passes < 20; passes++) {
-                
+                adr();
+                adu();
+                chp();
+                dal();
+                der();
+                deu();
+                edr();
+                exd();
+                ext();
+                hlp();
+                imd();
+                rer();
             }
-
-
-            
         } catch (AWTException e) {
             e.printStackTrace();
             return;
@@ -192,7 +234,7 @@ public class Fuzzing {
     }
 
     public static int getRandom(int min, int max) {
-        return (rand.nextInt() % (max - min)) + min;
+        return rand.nextInt(max - min) + min;
     }
 
     public static void assertion(String input, String expected) {
@@ -287,7 +329,7 @@ public class Fuzzing {
         test("LIN " + getInvalidInput(1, 16), "Invalid userID");
         //Subsequent logins
         testSubsequentLogins("admin", "ADMIN_PASSWORD");
-        String userID = getValidUserID();
+        String userID = createValidUserID();
         testSubsequentLogins(userID, users.get(userID));
         //already logged in
         out.enterString("LIN " + userID, 0);
