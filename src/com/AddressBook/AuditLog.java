@@ -56,7 +56,6 @@ to save user log
 
  public class AuditLog {
 
-     //TODO implement no user entries logging
 
      @SuppressWarnings("InnerClassMayBeStatic")
      private final class DataHolder implements Comparable<DataHolder> {
@@ -295,28 +294,6 @@ to save user log
          return logInstance;
      }
 
-     private void logRecovery() throws IOException {
-//        UserInput.getInstance().sendOutput("Failed to read Audit Log\n"
-//        + "Please enter the number of the action which you wish to take: \n"
-//        + "1. Terminate Audit Log read \n2. Reset Log");
-//        String input = UserInput.getInstance().getNextInput();
-//
-//        try {
-//            int i = Integer.parseInt(input.trim());
-//            if(i == 1)
-//                return;
-//            else if(i == 2)
-//                Files.delete(Paths.get(LOG_FILE_NAME));
-//            else {
-//                UserInput.getInstance().sendOutput("Input not recognized.  Please try again.");
-//                logRecovery();
-//            }
-//        } catch (NumberFormatException e) {
-//            UserInput.getInstance().sendOutput("Input not recognized.  Please try again.");
-//            logRecovery();
-//        }
-
-     }
 
      public void logCommand(Command command, boolean authorized) throws GeneralSecurityException, IOException {
          DataHolder data;
