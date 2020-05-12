@@ -58,12 +58,17 @@ to save user log
 
 
      @SuppressWarnings("InnerClassMayBeStatic")
-     private final class DataHolder implements Comparable<DataHolder> {
-         DataHolder(String commandType, String userName) {
+     private static final class DataHolder implements Comparable<DataHolder> {
+
+         private static DataHolder getLogClearedRecord(String userId) {
+             return new DataHolder("CLR_LOG", userId);
+         }
+
+         DataHolder(String commandType, String userId) {
              this.time = LocalTime.now();
              this.date = LocalDate.now();
              this.commandType = commandType;
-             this.userId = (userName != null) ? userName : "NO USER LOGGED IN";
+             this.userId = (userId != null) ? userId : "NO USER LOGGED IN";
          }
 
          DataHolder(String dataString) {
@@ -95,6 +100,7 @@ to save user log
          }
      }
 
+     private static final int MAX_NUM_RECORDS = 256;
      private static final String MAIN_DIR = ".logs";
      private static final String KEY_FILE_NAME = "keys.log";
      private static final String ENTRY_FILE_NAME = "entries.log";
@@ -178,7 +184,7 @@ to save user log
      }
 
 
-     private Path getUserKeyPath(String userId) {
+     private Path getUserKeysPath(String userId) {
          return Paths.get(MAIN_DIR, userId, KEY_FILE_NAME);
      }
 
@@ -222,9 +228,35 @@ to save user log
          return Files.readString(getUserEntryPath(userId));
      }
 
+     private void clearKeyFile(String userId) throws IOException {
+         Files.createDirectories(getUserKeysPath(userId).getParent());
+         Files.writeString(getUserKeysPath(userId), "", CREATE, TRUNCATE_EXISTING);
+     }
+
      private void setEncryptedEntriesFileContent(String userId, String encryptedEntries) throws IOException {
-         Files.createDirectories(getUserPrivateKeyPath(userId).getParent());
+         Files.createDirectories(getUserEntryPath(userId).getParent());
          Files.writeString(getUserEntryPath(userId), encryptedEntries, CREATE, TRUNCATE_EXISTING);
+     }
+
+     private void clearEncryptedEntries(String userId) throws IOException {
+         setEncryptedEntriesFileContent(userId, "");
+     }
+
+     private int getNumOfRecords(String userId) throws IOException {
+         if (Files.exists(getUserKeysPath(userId))) {
+             return Files.readAllLines(getUserKeysPath(userId)).size();
+         } else {
+             return 0;
+         }
+     }
+
+     private boolean logIsFull(String userId) throws IOException {
+         return getNumOfRecords(userId) >= MAX_NUM_RECORDS;
+     }
+
+     private void resetLog(String userId) throws IOException {
+         clearKeyFile(userId);
+         clearEncryptedEntries(userId);
      }
 
      private void addToNoUserEntries(String data) throws IOException {
@@ -310,10 +342,29 @@ to save user log
          User user = User.getInstance();
          String userId = user.getUserId();
          if (userId != null) {
+             //reset log after 256 entries
+             if (logIsFull(userId)) {
+                 //clear log files
+                 resetLog(userId);
+                 // get a random key for AES
+                 String key = genRandomKey();
+                 //add key to users key file, encrypted by public key for user
+                 addKey(getUserKeysPath(userId), key, user.getPublicKey());
+                 //get the previous entries that are an encrypted string
+                 String oldEntries = getEncryptedEntriesFileContent(userId);
+                 //get clear log entry
+                 DataHolder entry = DataHolder.getLogClearedRecord(userId);
+                 //add the new entry and encrypt
+                 String entries = encryptNewEntry(oldEntries, entry.toString(), key);
+                 //save that to the entries log file for the user
+                 setEncryptedEntriesFileContent(userId, entries);
+             }
+
+
              // get a random key for AES
              String key = genRandomKey();
              //add key to users key file, encrypted by public key for user
-             addKey(getUserKeyPath(userId), key, user.getPublicKey());
+             addKey(getUserKeysPath(userId), key, user.getPublicKey());
              //get the previous entries that are an encrypted string
              String oldEntries = getEncryptedEntriesFileContent(userId);
              //add the new entry and encrypt
@@ -331,7 +382,7 @@ to save user log
          //get all the entries for user
          String encryptedEntries = getEncryptedEntriesFileContent(userId);
          //get the keys for the entries
-         List<String> keys = getKeys(getUserKeyPath(userId), userPrivateKey);
+         List<String> keys = getKeys(getUserKeysPath(userId), userPrivateKey);
          // decrypt those entries
          List<String> entries = decryptEntries(encryptedEntries, keys);
          // turn entries into objects

@@ -203,7 +203,7 @@ public class Fuzzing {
         out.enterString("ADU "+userid.toString(), 0);
         assertion("ADU " + userid.toString(), "OK");
         logout();
-        out.enterString("LIN "+userid.toString(), 0);
+        out.enterString(""+userid.toString(), 0);
         String pwd = getValidInput(8, 16);
         out.enterString(pwd, 0);
         out.enterString(pwd, 0);
@@ -317,7 +317,7 @@ public class Fuzzing {
         for(int i = 0; i < getRandom(minLength, maxLength - 1); i++) {
             validInput += validChars[getRandom(0,validChars.length - 1)];
         }
-        validInput.trim();
+        validInput = validInput.trim();
         return validInput;
     }
 
@@ -327,7 +327,7 @@ public class Fuzzing {
         for(int i = 0; i < getRandom(minLength, maxLength - 1); i++)  {
             invalidInput += invalidChars[getRandom(0, invalidChars.length - 1)];
         }
-        invalidInput.trim();
+        invalidInput = invalidInput.trim();
         return invalidInput;
     }
 
@@ -347,7 +347,7 @@ public class Fuzzing {
 
     public static String getValidRecordID(String userid) {
         String recordID = getValidInput(1, 16);
-        out.enterString("ADR" + recordID, 0);
+        out.enterString("ADR " + recordID, 0);
         return recordID;
     }
     
@@ -428,9 +428,9 @@ public class Fuzzing {
         }
         test("LOU", expectedOutput);  //no params
         quickLIN(user);
-        test("LOU" + getValidInput(1, 25), expectedOutput);  //valid param
+        test("LOU " + getValidInput(1, 25), expectedOutput);  //valid param
         quickLIN(user);
-        test("LOU" + getInvalidInput(1, 25), expectedOutput);    //invalid param
+        test("LOU " + getInvalidInput(1, 25), expectedOutput);    //invalid param
         //function will end with default user regardless of user parameter
     }
 
@@ -450,8 +450,8 @@ public class Fuzzing {
         String currUser = "";
         if(user == 0) {
             test("CHP", expectedOutput);    //no params
-            test("CHP" + getValidInput(8, 24), expectedOutput); //valid param
-            test("CHP" + getInvalidInput(8, 24), expectedOutput);   //invalid param
+            test("CHP " + getValidInput(8, 24), expectedOutput); //valid param
+            test("CHP " + getInvalidInput(8, 24), expectedOutput);   //invalid param
             return; 
         }
         if(user == 1) {
@@ -464,25 +464,25 @@ public class Fuzzing {
             currUser = "Admin";
         }
         //no params
-        test("CHP", "Invalid input");
+        test("CHP ", "Invalid input");
         //valid/invalid param (not old pw)
-        test("CHP" + getValidInput(8, 24), "Incorrect password");
-        test("CHP" + getInvalidInput(8, 24), "Invalid input");
+        test("CHP " + getValidInput(8, 24), "Incorrect password");
+        test("CHP " + getInvalidInput(8, 24), "Invalid input");
         //using old pw
-        out.enterString("CHP" + oldpw, 0);  //invalid new pw
+        out.enterString("CHP " + oldpw, 0);  //invalid new pw
         out.enterString(getInvalidInput(8, 24), 0);
-        assertion("CHP" + currUser + "invalid new pw", "Invalid password");
-        out.enterString("CHP" + oldpw, 0);   //valid non-matching new pw
+        assertion("CHP " + currUser + "invalid new pw", "Invalid password");
+        out.enterString("CHP " + oldpw, 0);   //valid non-matching new pw
         out.enterString(getValidInput(8, 24), 0);
         out.enterString(getValidInput(8, 24), 0);
-        assertion("CHP" + currUser + "valid non-matching new pw", "Passwords don\'t match");
-        out.enterString("CHP" + oldpw, 0);  //valid matching new pw
+        assertion("CHP " + currUser + "valid non-matching new pw", "Passwords don\'t match");
+        out.enterString("CHP " + oldpw, 0);  //valid matching new pw
         String newpw = getValidInput(8, 24);
         out.enterString(newpw, 0);
         out.enterString(newpw, 0);
-        assertion("CHP" + currUser + "valid matching new pw", "OK");
+        assertion("CHP " + currUser + "valid matching new pw", "OK");
         if(user == 2) { //reset admin pw
-            out.enterString("CHP" + newpw, 0);
+            out.enterString("CHP " + newpw, 0);
             out.enterString(oldpw, 0);
             out.enterString(oldpw, 0);
         }
@@ -511,17 +511,17 @@ public class Fuzzing {
             expectedOutput = "User not authorized";
         }
         else if(user == 2) {
-            test("ADU", "Invalid input");   //no params
-            test("ADU" + getValidInput(1, 16), "OK");   //valid param
-            test("ADU" + getInvalidInput(1, 16), "Invalid input");  //invalid param
-            test("ADU" + getValidUserID(), "User already exists");  //param already exists 
+            test("ADU ", "Invalid input");   //no params
+            test("ADU " + getValidInput(1, 16), "OK");   //valid param
+            test("ADU " + getInvalidInput(1, 16), "Invalid input");  //invalid param
+            test("ADU " + getValidUserID(), "User already exists");  //param already exists 
             logout();
             return;
         }
-        test("ADU", expectedOutput);    //no params
-        test("ADU" + getValidInput(1, 16), expectedOutput); //valid param
-        test("ADU" + getInvalidInput(1, 16), expectedOutput);  //invalid param
-        test("ADU" + getValidUserID(), expectedOutput);  //param already exists
+        test("ADU ", expectedOutput);    //no params
+        test("ADU " + getValidInput(1, 16), expectedOutput); //valid param
+        test("ADU " + getInvalidInput(1, 16), expectedOutput);  //invalid param
+        test("ADU " + getValidUserID(), expectedOutput);  //param already exists
         if(user != 0) {
             logout();
         }
@@ -547,7 +547,7 @@ public class Fuzzing {
             expectedOutput = "User not authorized";
         }
         else if(user == 2) {
-            test("DEU", "Invalid input");   //no params
+            test("DEU ", "Invalid input");   //no params
             String dUID = getValidInput(1,16);
             deleteUserTest(dUID, "OK");     //valid param
             dUID = getInvalidInput(1,16);
@@ -556,9 +556,9 @@ public class Fuzzing {
             return;
         }
         test("DEU", expectedOutput);    //no params
-        test("DEU" + getValidInput(1, 16), expectedOutput); //valid param (non-user)
-        test("DEU" + getInvalidInput(1, 16), expectedOutput); //invalid param (non-user)
-        test("DEU" + getValidUserID(), expectedOutput); //valid param (user); won't delete it due to authorization blocks hopefully
+        test("DEU " + getValidInput(1, 16), expectedOutput); //valid param (non-user)
+        test("DEU " + getInvalidInput(1, 16), expectedOutput); //invalid param (non-user)
+        test("DEU " + getValidUserID(), expectedOutput); //valid param (user); won't delete it due to authorization blocks hopefully
         if(user != 0) {
             logout();   //logs out the user or admin
         }
@@ -566,7 +566,7 @@ public class Fuzzing {
 
     public static void deleteUserTest(String deleteUserID, String output) {
         out.enterString("ADU "+ deleteUserID, 0);
-        test("DEU" + deleteUserID, output);
+        test("DEU " + deleteUserID, output);
     }
 
 
@@ -593,8 +593,8 @@ public class Fuzzing {
             expectedOutput = "CHECK MANUALLY";
         }
         test("DAL", expectedOutput);
-        test("DAL" + getValidInput(1, 16), expectedOutput);
-        test("DAL" + getInvalidInput(1, 16), expectedOutput);
+        test("DAL " + getValidInput(1, 16), expectedOutput);
+        test("DAL " + getInvalidInput(1, 16), expectedOutput);
         if(user != 0) {
             logout();   //logs out the user or admin
         }
@@ -689,7 +689,7 @@ public class Fuzzing {
                     break;
             }
             String input = isValid ? getValidInput(1, 64) : getInvalidInput(0, 64);
-            s += " " + input + " ";
+            s += input + " ";
         }
         return s;
     }
@@ -711,8 +711,8 @@ public class Fuzzing {
         }
         else if(user == 1) {
             test("DER", "Invalid input");   //no params
-            test("DER" + getValidInput(1, 16), "Record not found"); //valid param (non-record)
-            test("DER" + getInvalidInput(1, 16), "Invalid input"); //invalid param (can't be record)
+            test("DER " + getValidInput(1, 16), "Record not found"); //valid param (non-record)
+            test("DER " + getInvalidInput(1, 16), "Invalid input"); //invalid param (can't be record)
             testDeleteRecord(getValidInput(1, 16), "OK");     //valid param (record); testDeleteRecord will create the record then test deleting it
             logout();
             return;   
@@ -721,17 +721,17 @@ public class Fuzzing {
             expectedOutput = "User not authorized";
         }
         test("DER", expectedOutput);    //no params
-        test("DER" + getValidInput(1, 16), expectedOutput); //valid param (non-record)
-        test("DER" + getInvalidInput(1, 16), expectedOutput); //invalid param (can't be record)
-        test("DER" + getValidRecordID(getValidUserID()), expectedOutput); //valid param (record); won't delete it due to authorization blocks hopefully
+        test("DER " + getValidInput(1, 16), expectedOutput); //valid param (non-record)
+        test("DER " + getInvalidInput(1, 16), expectedOutput); //invalid param (can't be record)
+        test("DER " + getValidRecordID(getValidUserID()), expectedOutput); //valid param (record); won't delete it due to authorization blocks hopefully
         if(user != 0) {
             logout();   //logs out the user or admin
         }
     }
 
     public static void testDeleteRecord(String recordID, String output) {
-        out.enterString("ADR" + recordID, 0);
-        test("DER" + recordID, output);
+        out.enterString("ADR " + recordID, 0);
+        test("DER " + recordID, output);
     }
 
     public static void edr() {
@@ -751,26 +751,26 @@ public class Fuzzing {
             expectedOutput = "No active login session";
         }
         else if(user == 1) {
-            out.enterString("ADR" + eRID + generateRecordParameters(getRandom(0, 11), true), 0);   //creates a generic recordID with any number of fields
+            out.enterString("ADR " + eRID + generateRecordParameters(getRandom(0, 11), true), 0);   //creates a generic recordID with any number of fields
             //no record ID
-            test("EDR", "Invalid input");
+            test("EDR ", "Invalid input");
             //non-existing record ID w/ valid chars
             expectedOutput = "Record not found";
-            test("EDR" + getValidInput(1,16), expectedOutput); //no params
-            test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
-            test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
-            test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+            test("EDR " + getValidInput(1,16), expectedOutput); //no params
+            test("EDR " + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+            test("EDR " + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+            test("EDR " + getValidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
             //non-existing record ID w/ invalid chars
             expectedOutput = "Invalid input";
-            test("EDR" + getInvalidInput(1,16), expectedOutput);   //no params
-            test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
-            test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
-            test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+            test("EDR " + getInvalidInput(1,16), expectedOutput);   //no params
+            test("EDR " + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+            test("EDR " + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+            test("EDR " + getInvalidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
             //valid existing recordID      
-            test("EDR" + eRID, "Invalid input"); //no params
-            test("EDR" + eRID + generateRecordParameters(getRandom(0,11), true), "OK"); //valid params
-            test("EDR" + eRID + generateRecordParameters(getRandom(0,11), false), "Invalid input"); //invalid params
-            test("EDR" + eRID + generateRecordParameters(getRandom(12, 24), true), "OK"); //extra params
+            test("EDR " + eRID, "Invalid input"); //no params
+            test("EDR " + eRID + generateRecordParameters(getRandom(0,11), true), "OK"); //valid params
+            test("EDR " + eRID + generateRecordParameters(getRandom(0,11), false), "Invalid input"); //invalid params
+            test("EDR " + eRID + generateRecordParameters(getRandom(12, 24), true), "OK"); //extra params
             logout();
             return;
         }
@@ -780,20 +780,20 @@ public class Fuzzing {
         //no record ID
         test("EDR", expectedOutput);
         //non-existing record ID w/ valid chars
-        test("EDR" + getValidInput(1,16), expectedOutput); //no params
-        test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
-        test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
-        test("EDR" + getValidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+        test("EDR " + getValidInput(1,16), expectedOutput); //no params
+        test("EDR " + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+        test("EDR " + getValidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+        test("EDR " + getValidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
         //non-existing record ID w/ invalid chars
-        test("EDR" + getInvalidInput(1,16), expectedOutput);   //no params
-        test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
-        test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
-        test("EDR" + getInvalidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
+        test("EDR " + getInvalidInput(1,16), expectedOutput);   //no params
+        test("EDR " + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), true), expectedOutput); //valid params
+        test("EDR " + getInvalidInput(1,16) + generateRecordParameters(getRandom(0, 11), false), expectedOutput); //invalid params
+        test("EDR " + getInvalidInput(1,16) + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra parameters
         //valid existing recordID      
-        test("EDR" + eRID, expectedOutput); //no params
-        test("EDR" + eRID + generateRecordParameters(getRandom(0,11), true), expectedOutput); //valid params
-        test("EDR" + eRID + generateRecordParameters(getRandom(0,11), false), expectedOutput); //invalid params
-        test("EDR" + eRID + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra params
+        test("EDR " + eRID, expectedOutput); //no params
+        test("EDR " + eRID + generateRecordParameters(getRandom(0,11), true), expectedOutput); //valid params
+        test("EDR " + eRID + generateRecordParameters(getRandom(0,11), false), expectedOutput); //invalid params
+        test("EDR " + eRID + generateRecordParameters(getRandom(12, 24), true), expectedOutput); //extra params
         if(user != 0) {
             logout();
         }
@@ -818,15 +818,15 @@ public class Fuzzing {
             expectedOutput = "No active login session";
         }
         else if(user == 1) {
-            out.enterString("ADR" + rRID + generateRecordParameters(getRandom(0, 11), true), 0);   //creates a generic recordID with any number of fields initialized
+            out.enterString("ADR " + rRID + generateRecordParameters(getRandom(0, 11), true), 0);   //creates a generic recordID with any number of fields initialized
             //no record ID
             test("RER", "Invalid input");
             //non-existing record
-            test("RER" + getValidInput(1, 16), "Record not found"); //valid param (non-record)
-            test("RER" + getInvalidInput(1, 16), "Invalid input");  //invalid param (can't be record)
+            test("RER " + getValidInput(1, 16), "Record not found"); //valid param (non-record)
+            test("RER " + getInvalidInput(1, 16), "Invalid input");  //invalid param (can't be record)
             //existing record
-            test("RER" + rRID, "OK"); //valid param
-            test("RER" + rRID + getValidInput(1, 16), "OK");    //extra params
+            test("RER " + rRID, "OK"); //valid param
+            test("RER " + rRID + getValidInput(1, 16), "OK");    //extra params
             logout();
             return;
         }
@@ -835,11 +835,11 @@ public class Fuzzing {
         }
         test("RER", expectedOutput);
         //non-existing record
-        test("RER" + getValidInput(1, 16), expectedOutput); //valid param
-        test("RER" + getInvalidInput(1, 16), expectedOutput);  //invalid param
+        test("RER " + getValidInput(1, 16), expectedOutput); //valid param
+        test("RER " + getInvalidInput(1, 16), expectedOutput);  //invalid param
         //existing record
-        test("RER" + getValidRecordID(getValidUserID()), expectedOutput); //valid param
-        test("RER" + rRID + getValidInput(1, 16), expectedOutput);    //extra params
+        test("RER " + getValidRecordID(getValidUserID()), expectedOutput); //valid param
+        test("RER " + rRID + getValidInput(1, 16), expectedOutput);    //extra params
         if(user != 0) {
             logout();
         }
@@ -853,7 +853,7 @@ public class Fuzzing {
         //user test
         loginUser();
         test("IMD", "Invalid input");
-        test("IMD" + getInvalidInput(1, 24), "Invalid input");
+        test("IMD " + getInvalidInput(1, 24), "Invalid input");
         test("IMD ~/" + getValidInput(1, 24) +"/"+getValidInput(1, 24), "Input file invalid format");
         randomNoiseFile("FuzzFiles/testfiles/randomdatabase.csv");
         test("IMD FuzzFiles/testfiles/emptydatabase.csv", "Invalid file");
@@ -888,7 +888,7 @@ public class Fuzzing {
         //user
         loginUser();
         test("EXD", "Invalid input");    //no params
-        test("EXD" + getInvalidInput(1, 16), "Invalid input");   //invalid params
+        test("EXD " + getInvalidInput(1, 16), "Invalid input");   //invalid params
         test("EXD " + getValidInput(1, 24) +"/"+getValidInput(1, 24), "Output file invalid format");
         test("EXD FuzFiles/testfiles/export_" + getValidInput(1, 16) + getValidInput(1, 16), "OK");   //extra params
         test("EXD FuzFiles/testfiles/export_" + getValidInput(1, 16), "OK");    //valid param
