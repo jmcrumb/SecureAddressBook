@@ -176,7 +176,7 @@ public class Fuzzing {
 
     // starts up the addressbook application
     public static void startup() {
-        out.enterString("java -jar AddressBook.jar >> f.u.z.z.l.o.g.log", 0);
+        out.enterString("java -jar AddressBook.jar", 0);
     }
 
     //Get userID's that already exists in the address book
