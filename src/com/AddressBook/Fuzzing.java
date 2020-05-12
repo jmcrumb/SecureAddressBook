@@ -139,14 +139,14 @@ public class Fuzzing {
 
         try {
             log = new FileWriter(LOG_FILEPATH);
-            out = new Output(100);
+            out = new Output(50);
             startup();
             // testing
             lin();
             for (int userPopulation = 0; userPopulation < 10; userPopulation++) {
                 createValidUserID();
             }
-            for (int passes = 0; passes < 20; passes++) {
+            for (int passes = 0; passes < 1; passes++) {
                 adr();
                 adu();
                 chp();
@@ -176,7 +176,7 @@ public class Fuzzing {
 
     // starts up the addressbook application
     public static void startup() {
-        out.enterString("java -jar AddressBook.jar", 0);
+        out.enterString("java -jar AddressBook.jar >> f.u.z.z.l.o.g.log", 0);
     }
 
     //Get userID's that already exists in the address book

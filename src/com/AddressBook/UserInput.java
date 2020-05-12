@@ -1,15 +1,15 @@
 package com.AddressBook;
 
-import java.io.Console;
+import java.util.Scanner;
 
 public class UserInput {
 
     private static UserInput instance;
 
-    private Console cnsl;
+    private Scanner scanner;
 
     private UserInput() {
-        cnsl = System.console();
+        scanner = new Scanner(System.in);
     }
 
 
@@ -19,14 +19,14 @@ public class UserInput {
     }
 
     public String getNextPassword() {
-        return new String(cnsl.readPassword());
+        return scanner.nextLine();
     }
     public String getNextInput() {
-        return cnsl.readLine();
+        return scanner.nextLine();
     }
 
     public void sendOutput(String output) {
-        cnsl.printf(output);
+        System.out.printf(output);
     }
 
 }

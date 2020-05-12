@@ -25,7 +25,6 @@
                  return commandParse(fullString);
              }
          } catch (Exception e) {
-             e.printStackTrace();
              throw new RuntimeException("Error getting next command.");
          }
      }
